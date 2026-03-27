@@ -155,12 +155,17 @@ static bool ValidateAndSerializeMetadata([[maybe_unused]] const IPartitionOpener
     }
 
     // Make sure all linear extents have a valid range.
-    uint64_t last_sector = super_device->size / LP_SECTOR_SIZE;
     for (const auto& extent : metadata.extents) {
         if (extent.target_type == LP_TARGET_TYPE_LINEAR) {
+            if (extent.target_source >= metadata.block_devices.size()) {
+                LERROR << "Extent references invalid block device.";
+                return false;
+            }
+            const auto& block_device = metadata.block_devices[extent.target_source];
+            uint64_t bd_last_sector = block_device.size / LP_SECTOR_SIZE;
             uint64_t physical_sector = extent.target_data;
-            if (physical_sector < super_device->first_logical_sector ||
-                physical_sector + extent.num_sectors > last_sector) {
+            if (physical_sector < block_device.first_logical_sector ||
+                physical_sector + extent.num_sectors > bd_last_sector) {
                 LERROR << "Extent table entry is out of bounds.";
                 return false;
             }
