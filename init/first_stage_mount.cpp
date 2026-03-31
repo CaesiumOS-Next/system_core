@@ -377,6 +377,15 @@ bool FirstStageMountVBootV2::CreateLogicalPartitions() {
         return false;
     }
 
+    auto metadata = android::fs_mgr::ReadCurrentMetadata(super_path_);
+    if (!metadata) {
+        LOG(ERROR) << "Could not read logical partition metadata from " << super_path_;
+        return false;
+    }
+    if (!InitDmLinearBackingDevices(*metadata.get())) {
+        return false;
+    }
+
     if (SnapshotManager::IsSnapshotManagerNeeded()) {
         auto init_devices = [this](const std::string& device) -> bool {
             if (android::base::StartsWith(device, "/dev/block/dm-")) {
@@ -395,14 +404,6 @@ bool FirstStageMountVBootV2::CreateLogicalPartitions() {
         }
     }
 
-    auto metadata = android::fs_mgr::ReadCurrentMetadata(super_path_);
-    if (!metadata) {
-        LOG(ERROR) << "Could not read logical partition metadata from " << super_path_;
-        return false;
-    }
-    if (!InitDmLinearBackingDevices(*metadata.get())) {
-        return false;
-    }
     return android::fs_mgr::CreateLogicalPartitions(*metadata.get(), super_path_);
 }
 
