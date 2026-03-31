@@ -231,6 +231,17 @@ void SnapuserdSelinuxHelper::StartTransition() {
 
 void SnapuserdSelinuxHelper::FinishTransition() {
     RelabelLink("/dev/block/by-name/super");
+    // Relabel all additional block devices from LP metadata
+    if (auto metadata = android::fs_mgr::ReadCurrentMetadata("super")) {
+        for (const auto& name : android::fs_mgr::GetBlockDevicePartitionNames(*metadata)) {
+            if (name != "super") {
+                RelabelLink("/dev/block/by-name/" + name);
+            }
+        }
+    } else {
+        LOG(FATAL) << "Failed to read super partition metadata";
+    }
+
     RelabelDeviceMapper();
 
     selinux_android_restorecon("/dev/null", 0);
