@@ -289,6 +289,10 @@ class MetadataBuilder {
     // Delete a partition by name if it exists.
     void RemovePartition(std::string_view name);
 
+    // Rename a partition. This will return false if the new name already exists
+    // or if the name is invalid.
+    bool RenamePartition(Partition* partition, std::string_view new_name);
+
     // Find a partition by name. If no partition is found, nullptr is returned.
     Partition* FindPartition(std::string_view name) const;
 
