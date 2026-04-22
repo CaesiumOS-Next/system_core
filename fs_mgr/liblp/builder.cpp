@@ -527,6 +527,19 @@ void MetadataBuilder::RemovePartition(std::string_view name) {
     }
 }
 
+bool MetadataBuilder::RenamePartition(Partition* partition, std::string_view new_name) {
+    if (new_name.empty()) {
+        LERROR << "Partition must have a non-empty name.";
+        return false;
+    }
+    if (FindPartition(new_name)) {
+        LERROR << "Attempting to rename partition to existing name: " << new_name;
+        return false;
+    }
+    partition->name_ = new_name;
+    return true;
+}
+
 void MetadataBuilder::ExtentsToFreeList(const std::vector<Interval>& extents,
                                         std::vector<Interval>* free_regions) const {
     // Convert the extent list into a list of gaps between the extents; i.e.,
