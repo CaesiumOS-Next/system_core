@@ -38,6 +38,8 @@ enum class SubCommand {
     kUnknown,
     kAdd,
     kRemove,
+    kChgrp,
+    kRename,
 };
 
 static int usage(const char* program, SubCommand cmd = SubCommand::kUnknown) {
@@ -48,6 +50,8 @@ static int usage(const char* program, SubCommand cmd = SubCommand::kUnknown) {
     std::cerr << "Usage:\n";
     std::cerr << "  " << program << " add [options] SUPER_DEVICE PARTNAME PARTGROUP\n";
     std::cerr << "  " << program << " remove [options] SUPER_DEVICE PARTNAME\n";
+    std::cerr << "  " << program << " chgrp [options] SUPER_DEVICE PARTNAME PARTGROUP\n";
+    std::cerr << "  " << program << " rename [options] SUPER_DEVICE OLD_NAME NEW_NAME\n";
     std::cerr << "\n";
 
     if (cmd == SubCommand::kUnknown || cmd == SubCommand::kAdd) {
@@ -71,6 +75,20 @@ static int usage(const char* program, SubCommand cmd = SubCommand::kUnknown) {
                      "/dev/block/by-name/super).\n";
         std::cerr << "  PARTNAME                      Name of the partition to remove.\n";
     }
+    if (cmd == SubCommand::kUnknown || cmd == SubCommand::kChgrp) {
+        std::cerr << "\nChgrp sub-command options:\n";
+        std::cerr << "  SUPER_DEVICE                  Path to the super block device (e.g., "
+                     "/dev/block/by-name/super).\n";
+        std::cerr << "  PARTNAME                      Name of the partition to move.\n";
+        std::cerr << "  PARTGROUP                     Name of the new partition group.\n";
+    }
+    if (cmd == SubCommand::kUnknown || cmd == SubCommand::kRename) {
+        std::cerr << "\nRename sub-command options:\n";
+        std::cerr << "  SUPER_DEVICE                  Path to the super block device (e.g., "
+                     "/dev/block/by-name/super).\n";
+        std::cerr << "  OLD_NAME                      Current name of the partition.\n";
+        std::cerr << "  NEW_NAME                      New name of the partition.\n";
+    }
     std::cerr << "\nCommon options:\n";
     std::cerr << "  --slot <number>               Metadata slot number to use (default is 0).\n";
     std::cerr << "  -h, --help                    Show this help message.\n";
@@ -88,6 +106,8 @@ class SuperModifyHelper final {
                                     const std::string& group_name, uint32_t attributes,
                                     uint64_t partition_size, bool replace);
     bool RemovePartition(const std::string& partition_name);
+    bool ChangePartitionGroup(const std::string& partition_name, const std::string& group_name);
+    bool RenamePartition(const std::string& old_name, const std::string& new_name);
     bool Finalize();
 
   private:
@@ -165,6 +185,38 @@ bool SuperModifyHelper::RemovePartition(const std::string& partition_name) {
     return UpdateSuperMetadata();
 }
 
+bool SuperModifyHelper::ChangePartitionGroup(const std::string& partition_name,
+                                             const std::string& group_name) {
+    auto partition = builder_->FindPartition(partition_name);
+    if (!partition) {
+        std::cerr << "Could not find partition: " << partition_name << "\n";
+        return false;
+    }
+    if (!builder_->ChangePartitionGroup(partition, group_name)) {
+        std::cerr << "Could not change group of partition " << partition_name << " to "
+                  << group_name << ".\n";
+        return false;
+    }
+    std::cout << "Successfully changed group of partition " << partition_name << " to "
+              << group_name << "." << std::endl;
+    return UpdateSuperMetadata();
+}
+
+bool SuperModifyHelper::RenamePartition(const std::string& old_name, const std::string& new_name) {
+    auto partition = builder_->FindPartition(old_name);
+    if (!partition) {
+        std::cerr << "Could not find partition: " << old_name << "\n";
+        return false;
+    }
+    if (!builder_->RenamePartition(partition, new_name)) {
+        std::cerr << "Could not rename partition " << old_name << " to " << new_name << ".\n";
+        return false;
+    }
+    std::cout << "Successfully renamed partition " << old_name << " to " << new_name << "."
+              << std::endl;
+    return UpdateSuperMetadata();
+}
+
 bool SuperModifyHelper::OpenSuperDevice() {
     super_device_fd_.reset(open(super_device_path_.c_str(), O_RDWR | O_CLOEXEC));
     if (super_device_fd_ < 0) {
@@ -208,6 +260,16 @@ enum class AddOptionCode : int {
 };
 
 enum class RemoveOptionCode : int {
+    kSlot = 1,  // Common option
+    kHelp = 'h',
+};
+
+enum class ChgrpOptionCode : int {
+    kSlot = 1,  // Common option
+    kHelp = 'h',
+};
+
+enum class RenameOptionCode : int {
     kSlot = 1,  // Common option
     kHelp = 'h',
 };
@@ -342,6 +404,120 @@ int HandleRemoveCommand(int argc, char* argv[], const char* program_name) {
     return EX_OK;
 }
 
+int HandleChgrpCommand(int argc, char* argv[], const char* program_name) {
+    struct option chgrp_options[] = {
+            {"slot", required_argument, nullptr, static_cast<int>(ChgrpOptionCode::kSlot)},
+            {"help", no_argument, nullptr, static_cast<int>(ChgrpOptionCode::kHelp)},
+            {nullptr, 0, nullptr, 0},
+    };
+
+    uint32_t slot = 0;
+
+    int rv;
+    // Reset optind for subcommand parsing
+    optind = 1;
+    while ((rv = getopt_long(argc, argv, "h", chgrp_options, nullptr)) != -1) {
+        switch (rv) {
+            case static_cast<int>(ChgrpOptionCode::kHelp):
+                return usage(program_name, SubCommand::kChgrp);
+            case static_cast<int>(ChgrpOptionCode::kSlot): {
+                if (!android::base::ParseUint(optarg, &slot)) {
+                    std::cerr << "Error: Invalid argument for --slot: " << optarg
+                              << ". Must be a non-negative integer.\n";
+                    return usage(program_name, SubCommand::kChgrp);
+                }
+            } break;
+            default:
+                return usage(program_name, SubCommand::kChgrp);
+        }
+    }
+
+    if (argc - optind != 3) {
+        std::cerr << "Error: Incorrect number of arguments for 'chgrp'. Expected SUPER_DEVICE "
+                     "PARTNAME PARTGROUP.\n\n";
+        return usage(program_name, SubCommand::kChgrp);
+    }
+
+    std::string super_device_path = argv[optind++];
+    std::string partition_name = argv[optind++];
+    std::string group_name = argv[optind++];
+
+    SuperModifyHelper modifier(super_device_path, slot);
+    if (!modifier.Open()) {
+        return EX_SOFTWARE;
+    }
+
+    if (!modifier.ChangePartitionGroup(partition_name, group_name)) {
+        modifier.Finalize();
+        return EX_SOFTWARE;
+    }
+
+    if (!modifier.Finalize()) {
+        return EX_SOFTWARE;
+    }
+
+    std::cout << "lpmodify chgrp: Partition " << partition_name << " moved to group " << group_name
+              << " successfully on " << super_device_path << ".\n";
+    return EX_OK;
+}
+
+int HandleRenameCommand(int argc, char* argv[], const char* program_name) {
+    struct option rename_options[] = {
+            {"slot", required_argument, nullptr, static_cast<int>(RenameOptionCode::kSlot)},
+            {"help", no_argument, nullptr, static_cast<int>(RenameOptionCode::kHelp)},
+            {nullptr, 0, nullptr, 0},
+    };
+
+    uint32_t slot = 0;
+
+    int rv;
+    // Reset optind for subcommand parsing
+    optind = 1;
+    while ((rv = getopt_long(argc, argv, "h", rename_options, nullptr)) != -1) {
+        switch (rv) {
+            case static_cast<int>(RenameOptionCode::kHelp):
+                return usage(program_name, SubCommand::kRename);
+            case static_cast<int>(RenameOptionCode::kSlot): {
+                if (!android::base::ParseUint(optarg, &slot)) {
+                    std::cerr << "Error: Invalid argument for --slot: " << optarg
+                              << ". Must be a non-negative integer.\n";
+                    return usage(program_name, SubCommand::kRename);
+                }
+            } break;
+            default:
+                return usage(program_name, SubCommand::kRename);
+        }
+    }
+
+    if (argc - optind != 3) {
+        std::cerr << "Error: Incorrect number of arguments for 'rename'. Expected SUPER_DEVICE "
+                     "OLD_NAME NEW_NAME.\n\n";
+        return usage(program_name, SubCommand::kRename);
+    }
+
+    std::string super_device_path = argv[optind++];
+    std::string old_name = argv[optind++];
+    std::string new_name = argv[optind++];
+
+    SuperModifyHelper modifier(super_device_path, slot);
+    if (!modifier.Open()) {
+        return EX_SOFTWARE;
+    }
+
+    if (!modifier.RenamePartition(old_name, new_name)) {
+        modifier.Finalize();
+        return EX_SOFTWARE;
+    }
+
+    if (!modifier.Finalize()) {
+        return EX_SOFTWARE;
+    }
+
+    std::cout << "lpmodify rename: Partition " << old_name << " renamed to " << new_name
+              << " successfully on " << super_device_path << ".\n";
+    return EX_OK;
+}
+
 int main(int argc, char* argv[]) {
     const char* program_name = argv[0];
 
@@ -357,6 +533,10 @@ int main(int argc, char* argv[]) {
         return HandleAddCommand(argc - 1, argv + 1, program_name);
     } else if (subcommand_str == "remove") {
         return HandleRemoveCommand(argc - 1, argv + 1, program_name);
+    } else if (subcommand_str == "chgrp") {
+        return HandleChgrpCommand(argc - 1, argv + 1, program_name);
+    } else if (subcommand_str == "rename") {
+        return HandleRenameCommand(argc - 1, argv + 1, program_name);
     } else if (subcommand_str == "--help" || subcommand_str == "-h") {
         return usage(program_name);
     } else {

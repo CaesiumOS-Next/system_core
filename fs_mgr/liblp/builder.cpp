@@ -458,7 +458,29 @@ bool MetadataBuilder::Init(const std::vector<BlockDeviceInfo>& block_devices,
     return true;
 }
 
+static bool IsValidName(std::string_view name) {
+    if (name.empty()) {
+        LERROR << "Name cannot be empty.";
+        return false;
+    }
+    if (name.size() > 36) {
+        LERROR << "Name is too long: " << name << " (max 36 characters).";
+        return false;
+    }
+    for (char c : name) {
+        if (!isalnum(c) && c != '_') {
+            LERROR << "Name contains invalid character: " << c
+                   << " (only alphanumeric and _ are allowed).";
+            return false;
+        }
+    }
+    return true;
+}
+
 bool MetadataBuilder::AddGroup(std::string_view group_name, uint64_t maximum_size) {
+    if (!IsValidName(group_name)) {
+        return false;
+    }
     if (FindGroup(group_name)) {
         LERROR << "Group already exists: " << group_name;
         return false;
@@ -473,8 +495,7 @@ Partition* MetadataBuilder::AddPartition(const std::string& name, uint32_t attri
 
 Partition* MetadataBuilder::AddPartition(std::string_view name, std::string_view group_name,
                                          uint32_t attributes) {
-    if (name.empty()) {
-        LERROR << "Partition must have a non-empty name.";
+    if (!IsValidName(name)) {
         return nullptr;
     }
     if (FindPartition(name)) {
@@ -525,6 +546,18 @@ void MetadataBuilder::RemovePartition(std::string_view name) {
             return;
         }
     }
+}
+
+bool MetadataBuilder::RenamePartition(Partition* partition, std::string_view new_name) {
+    if (!IsValidName(new_name)) {
+        return false;
+    }
+    if (FindPartition(new_name)) {
+        LERROR << "Attempting to rename partition to existing name: " << new_name;
+        return false;
+    }
+    partition->name_ = new_name;
+    return true;
 }
 
 void MetadataBuilder::ExtentsToFreeList(const std::vector<Interval>& extents,
