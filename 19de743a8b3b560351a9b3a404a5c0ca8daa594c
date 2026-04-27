@@ -16,6 +16,23 @@
       "message": "1",
       "revId": "19de743a8b3b560351a9b3a404a5c0ca8daa594c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9db169f4_8f551f06",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 4800572
+      },
+      "writtenOn": "2026-04-27T06:52:36Z",
+      "side": 1,
+      "message": "fastboot/device/fastboot_device.cpp",
+      "revId": "19de743a8b3b560351a9b3a404a5c0ca8daa594c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
