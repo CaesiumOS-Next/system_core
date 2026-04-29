@@ -1098,6 +1098,9 @@ on boot && property:suspend.disable_sync_on_suspend=true
     write /sys/power/sync_on_suspend 0
 
 on boot
+    # Start auditctl rule for tracing buffer_size_kb modifications
+    start auditd-trace-buffer
+
     # basic network init
     ifup lo
     hostname localhost
@@ -1280,6 +1283,13 @@ on property:security.lower_kptr_restrict=0
 # on shutdown
 # In device's init.rc, this trigger can be used to do device-specific actions
 # before shutdown. e.g disable watchdog and mask error handling
+
+service auditd-trace-buffer /system/bin/auditctl -w /sys/kernel/tracing/buffer_size_kb -p wa -k buffer_size_kb_edit
+    oneshot
+    disabled
+    user root
+    group root
+    capabilities AUDIT_CONTROL
 
 ## Daemon processes to be run by init.
 ##
