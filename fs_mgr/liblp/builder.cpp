@@ -1014,6 +1014,34 @@ bool MetadataBuilder::HasBlockDevice(const std::string& partition_name) const {
     return FindBlockDeviceByName(partition_name, &index);
 }
 
+bool MetadataBuilder::AddBlockDevice(const std::string& partition_name, uint64_t size) {
+    if (HasBlockDevice(partition_name)) {
+        LERROR << "Partition name " << partition_name << " has already been added to super";
+        return false;
+    }
+    if (partition_name.size() >
+        sizeof(static_cast<LpMetadataBlockDevice*>(nullptr)->partition_name)) {
+        LERROR << "Partition name " << partition_name << " exceeds maximum length.";
+        return false;
+    }
+
+    BlockDeviceInfo super_info;
+    if (!GetBlockDeviceInfo(LP_METADATA_DEFAULT_PARTITION_NAME, &super_info)) {
+        LERROR << "Cannot read super block device info.";
+        return false;
+    }
+
+    LpMetadataBlockDevice device = {};
+    device.size = size;
+    device.alignment = super_info.alignment;
+    device.alignment_offset = 0;
+    device.first_logical_sector = 0;
+    strncpy(device.partition_name, partition_name.c_str(), sizeof(device.partition_name));
+
+    block_devices_.push_back(device);
+    return true;
+}
+
 bool MetadataBuilder::GetBlockDeviceInfo(const std::string& partition_name,
                                          BlockDeviceInfo* info) const {
     uint32_t index;

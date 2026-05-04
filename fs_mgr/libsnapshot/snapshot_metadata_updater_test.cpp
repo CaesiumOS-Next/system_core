@@ -334,6 +334,19 @@ TEST_P(SnapshotMetadataUpdaterTest, DeleteAndAddGroup) {
     EXPECT_TRUE(CheckGroupName("product", "another_group"));
 }
 
+TEST_P(SnapshotMetadataUpdaterTest, AddBlockDevice) {
+    auto bd = manifest_.mutable_dynamic_partition_metadata()->add_block_devices();
+    bd->set_name("extra");
+    bd->set_size(1_GiB);
+
+    EXPECT_TRUE(UpdateAndExport());
+    EXPECT_TRUE(builder_->HasBlockDevice("extra"));
+
+    android::fs_mgr::BlockDeviceInfo info;
+    EXPECT_TRUE(builder_->GetBlockDeviceInfo("extra", &info));
+    EXPECT_EQ(info.size, 1_GiB);
+}
+
 INSTANTIATE_TEST_SUITE_P(Snapshot, SnapshotMetadataUpdaterTest, testing::Values(0, 1));
 
 }  // namespace snapshot

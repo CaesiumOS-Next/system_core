@@ -687,6 +687,20 @@ TEST_F(BuilderTest, MultipleBlockDevices) {
     EXPECT_EQ(metadata->extents[2].target_source, 2);
 }
 
+TEST_F(BuilderTest, AddBlockDevice) {
+    unique_ptr<MetadataBuilder> builder = MetadataBuilder::New(1024 * 1024, 1024, 2);
+    ASSERT_NE(builder, nullptr);
+
+    EXPECT_TRUE(builder->AddBlockDevice("extra", 1024 * 1024));
+    EXPECT_TRUE(builder->HasBlockDevice("extra"));
+
+    BlockDeviceInfo info;
+    EXPECT_TRUE(builder->GetBlockDeviceInfo("extra", &info));
+    EXPECT_EQ(info.size, 1024 * 1024);
+
+    EXPECT_FALSE(builder->AddBlockDevice("extra", 1024 * 1024));
+}
+
 TEST_F(BuilderTest, ImportPartitionsOk) {
     unique_ptr<MetadataBuilder> builder = MetadataBuilder::New(1024 * 1024, 1024, 2);
     ASSERT_NE(builder, nullptr);
