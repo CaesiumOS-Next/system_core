@@ -65,6 +65,12 @@ SnapshotMetadataUpdater::SnapshotMetadataUpdater(MetadataBuilder* builder, uint3
         }
     }
 
+    const auto& manifest_block_devices = manifest.dynamic_partition_metadata().block_devices();
+    block_devices_.reserve(manifest_block_devices.size());
+    for (const auto& bd : manifest_block_devices) {
+        block_devices_.emplace_back(BlockDevice{bd.name(), bd.size()});
+    }
+
 }
 
 bool SnapshotMetadataUpdater::ShrinkPartitions() const {
@@ -195,6 +201,30 @@ bool SnapshotMetadataUpdater::DeleteGroups() const {
     return true;
 }
 
+bool SnapshotMetadataUpdater::AddBlockDevices() const {
+    auto exported = builder_->Export();
+    if (!exported) {
+        LOG(ERROR) << "Cannot export metadata";
+        return false;
+    }
+    const auto* super = android::fs_mgr::GetMetadataSuperBlockDevice(*exported);
+    if (!super) {
+        LOG(ERROR) << "Cannot locate super block device in metadata";
+        return false;
+    }
+    for (const auto& block_device : block_devices_) {
+        if (builder_->HasBlockDevice(block_device.name)) {
+            continue;
+        }
+        if (!builder_->AddBlockDevice(block_device.name, block_device.size, super->alignment,
+                                      super->alignment_offset, super->first_logical_sector)) {
+            LOG(ERROR) << "Failed to add block device: " << block_device.name;
+            return false;
+        }
+    }
+    return true;
+}
+
 bool SnapshotMetadataUpdater::AddGroups() const {
     for (const auto& group_update : groups_) {
         if (builder_->FindGroup(group_update.name) == nullptr) {
@@ -282,6 +312,7 @@ bool SnapshotMetadataUpdater::Update() const {
            MovePartitionsToDefault() &&
            ShrinkGroups() &&
            DeleteGroups() &&
+           AddBlockDevices() &&
            AddGroups() &&
            GrowGroups() &&
            AddPartitions() &&
