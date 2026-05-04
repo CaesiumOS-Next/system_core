@@ -1014,6 +1014,39 @@ bool MetadataBuilder::HasBlockDevice(const std::string& partition_name) const {
     return FindBlockDeviceByName(partition_name, &index);
 }
 
+bool MetadataBuilder::AddBlockDevice(const std::string& partition_name, uint64_t size,
+                                     uint32_t alignment, uint32_t alignment_offset,
+                                     uint64_t first_logical_sector) {
+    if (HasBlockDevice(partition_name)) {
+        return false;
+    }
+
+    LpMetadataBlockDevice device = {};
+    device.size = size;
+    device.alignment = alignment;
+    device.alignment_offset = alignment_offset;
+    device.first_logical_sector = first_logical_sector;
+    strncpy(device.partition_name, partition_name.c_str(), sizeof(device.partition_name) - 1);
+
+    if (device.first_logical_sector == 0) {
+        uint64_t free_area_start = LP_SECTOR_SIZE;
+        bool ok;
+        if (device.alignment) {
+            ok = AlignTo(free_area_start, device.alignment, &free_area_start);
+        } else {
+            ok = AlignTo(free_area_start, logical_block_size(), &free_area_start);
+        }
+        if (!ok) {
+            LERROR << "Integer overflow computing free area start";
+            return false;
+        }
+        device.first_logical_sector = free_area_start / LP_SECTOR_SIZE;
+    }
+
+    block_devices_.push_back(device);
+    return true;
+}
+
 bool MetadataBuilder::GetBlockDeviceInfo(const std::string& partition_name,
                                          BlockDeviceInfo* info) const {
     uint32_t index;
