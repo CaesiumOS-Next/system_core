@@ -3425,6 +3425,14 @@ Return SnapshotManager::CreateUpdateSnapshots(const DeltaArchiveManifest& manife
         LOG(ERROR) << "Cannot create metadata builder.";
         return Return::Error();
     }
+    for (const auto& bd : manifest.dynamic_partition_metadata().block_devices()) {
+        if (!current_metadata->HasBlockDevice(bd.name())) {
+            if (!current_metadata->AddBlockDevice(bd.name(), bd.size())) {
+                LOG(ERROR) << "Failed to mirror block device " << bd.name();
+                return Return::Error();
+            }
+        }
+    }
 
     auto target_metadata =
             MetadataBuilder::NewForUpdate(opener, current_super, current_slot, target_slot);
