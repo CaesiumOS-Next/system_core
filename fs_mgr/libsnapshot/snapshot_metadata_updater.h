@@ -51,6 +51,7 @@ class SnapshotMetadataUpdater {
     bool MovePartitionsToDefault() const;
     bool ShrinkGroups() const;
     bool DeleteGroups() const;
+    bool AddBlockDevices() const;
     bool AddGroups() const;
     bool GrowGroups() const;
     bool AddPartitions() const;
@@ -74,11 +75,16 @@ class SnapshotMetadataUpdater {
         const PartitionUpdate* partition;
         const PartitionUpdate* operator->() const { return partition; }
     };
+    struct BlockDevice {
+        std::string name;
+        uint64_t size;
+    };
 
     android::fs_mgr::MetadataBuilder* const builder_;
     const std::string target_suffix_;
     std::vector<Group> groups_;
     std::vector<Partition> partitions_;
+    std::vector<BlockDevice> block_devices_;
     bool partial_update_{false};
 };
 
