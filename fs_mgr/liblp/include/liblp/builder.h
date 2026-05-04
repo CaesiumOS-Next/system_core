@@ -364,6 +364,13 @@ class MetadataBuilder {
     // Return true if a block device is found, else false.
     bool HasBlockDevice(const std::string& partition_name) const;
 
+    // Add a new block device. If the block device already exists, false is
+    // returned.
+    //
+    // If first_logical_sector is 0, it will be automatically calculated based
+    // on alignment.
+    bool AddBlockDevice(const std::string& partition_name, uint64_t size);
+
     // Return the name of the block device at |index|.
     std::string GetBlockDevicePartitionName(uint64_t index) const;
 
