@@ -379,25 +379,24 @@ void Modprobe::ParseKernelCmdlineOptions(void) {
 Modprobe::Modprobe(const std::vector<std::string>& base_paths, const std::string load_file,
                    bool use_blocklist)
     : blocklist_enabled(use_blocklist) {
-    using namespace std::placeholders;
 
     for (const auto& base_path : base_paths) {
-        auto alias_callback = std::bind(&Modprobe::ParseAliasCallback, this, _1);
+        auto alias_callback = [this](const auto& args) { return ParseAliasCallback(args); };
         ParseCfg(base_path + "/modules.alias", alias_callback);
 
-        auto dep_callback = std::bind(&Modprobe::ParseDepCallback, this, base_path, _1);
+        auto dep_callback = [this, &base_path](const auto& args) { return ParseDepCallback(base_path, args); };
         ParseCfg(base_path + "/modules.dep", dep_callback);
 
-        auto softdep_callback = std::bind(&Modprobe::ParseSoftdepCallback, this, _1);
+        auto softdep_callback = [this](const auto& args) { return ParseSoftdepCallback(args); };
         ParseCfg(base_path + "/modules.softdep", softdep_callback);
 
-        auto load_callback = std::bind(&Modprobe::ParseLoadCallback, this, _1);
+        auto load_callback = [this](const auto& args) { return ParseLoadCallback(args); };
         ParseCfg(base_path + "/" + load_file, load_callback);
 
-        auto options_callback = std::bind(&Modprobe::ParseOptionsCallback, this, _1);
+        auto options_callback = [this](const auto& args) { return ParseOptionsCallback(args); };
         ParseCfg(base_path + "/modules.options", options_callback);
 
-        auto blocklist_callback = std::bind(&Modprobe::ParseBlocklistCallback, this, _1);
+        auto blocklist_callback = [this](const auto& args) { return ParseBlocklistCallback(args); };
         ParseCfg(base_path + "/modules.blocklist", blocklist_callback);
     }
 
