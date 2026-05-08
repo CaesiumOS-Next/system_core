@@ -89,7 +89,6 @@ using android::base::ReadFully;
 using android::base::Split;
 using android::base::Trim;
 using android::base::unique_fd;
-using namespace std::placeholders;
 
 #define FASTBOOT_INFO_VERSION 1
 
@@ -1466,7 +1465,7 @@ static void do_fetch(const std::string& partition, const std::string& slot_overr
                      const std::string& outfile, fastboot::IFastBootDriver* fb) {
     unique_fd fd(TEMP_FAILURE_RETRY(
             open(outfile.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_BINARY, 0644)));
-    auto fetch = std::bind(fetch_partition, _1, borrowed_fd(fd), fb);
+    auto fetch = [fd, fb](const std::string& partition) { return fetch_partition(partition, borrowed_fd(fd), fb); };
     do_for_partitions(partition, slot_override, fetch, false /* force slot */);
 }
 
