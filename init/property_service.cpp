@@ -1476,7 +1476,7 @@ static void PropertyServiceThread(int fd, bool listen_init) {
         LOG(FATAL) << result.error();
     }
 
-    if (auto result = epoll.RegisterHandler(fd, std::bind(handle_property_set_fd, fd));
+    if (auto result = epoll.RegisterHandler(fd, [fd] { handle_property_set_fd(fd); });
         !result.ok()) {
         LOG(FATAL) << result.error();
     }
