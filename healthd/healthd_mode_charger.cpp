@@ -777,7 +777,7 @@ void Charger::OnInit(struct healthd_config* config) {
     LOGW("--------------- STARTING CHARGER MODE ---------------\n");
 
     ret = ev_init(
-            std::bind(&Charger::InputCallback, this, std::placeholders::_1, std::placeholders::_2));
+            [this](int fd, unsigned int events) { return InputCallback(fd, events); });
     if (!ret) {
         epollfd = ev_get_epollfd();
         configuration_->ChargerRegisterEvent(epollfd, &charger_event_handler, EVENT_WAKEUP_FD);
@@ -821,11 +821,10 @@ void Charger::OnInit(struct healthd_config* config) {
     }
     drm_ = DRM_INNER;
     screen_switch_ = SCREEN_SWITCH_DEFAULT;
-    ev_sync_key_state(std::bind(&Charger::SetKeyCallback, this, std::placeholders::_1,
-                                std::placeholders::_2));
+    ev_sync_key_state([this](int code, int value) { return SetKeyCallback(code, value); });
 
     (void)ev_sync_sw_state(
-            std::bind(&Charger::SetSwCallback, this, std::placeholders::_1, std::placeholders::_2));
+            [this](int code, int value) { return SetSwCallback(code, value); });
 
     next_screen_transition_ = -1;
     next_key_check_ = -1;
