@@ -120,12 +120,12 @@ ExternalFirmwareHandler::ExternalFirmwareHandler(std::string devpath, uid_t uid,
     if (wildcard_position != std::string::npos) {
         if (wildcard_position == this->devpath.length() - 1) {
             this->devpath.pop_back();
-            match = std::bind(PrefixMatch, this->devpath, std::placeholders::_1);
+            match = [this](const std::string& arg) { return PrefixMatch(this->devpath, arg); };
         } else {
-            match = std::bind(FnMatch, this->devpath, std::placeholders::_1);
+            match = [this](const auto& arg) { return FnMatch(this->devpath, arg); };
         }
     } else {
-        match = std::bind(EqualMatch, this->devpath, std::placeholders::_1);
+        match = [this](const auto& arg) { return EqualMatch(this->devpath, arg); };
     }
 }
 
@@ -248,7 +248,7 @@ bool FirmwareHandler::ForEachFirmwareDirectory(
 
     glob_t glob_result;
     glob("/apex/*/etc/firmware/", GLOB_MARK, nullptr, &glob_result);
-    auto free_glob = android::base::make_scope_guard(std::bind(&globfree, &glob_result));
+    auto free_glob = android::base::make_scope_guard([&glob_result] { globfree(&glob_result); });
     for (size_t i = 0; i < glob_result.gl_pathc; i++) {
         char* apex_firmware_directory = glob_result.gl_pathv[i];
         // Filter-out /apex/<name>@<ver> paths. The paths are bind-mounted to
