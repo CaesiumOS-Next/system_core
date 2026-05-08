@@ -104,7 +104,7 @@ bool SnapshotHandlerManager::StartHandler(const std::shared_ptr<HandlerThread>& 
 
     handler->snapuserd()->AttachControlDevice();
 
-    handler->thread() = std::thread(std::bind(&SnapshotHandlerManager::RunThread, this, handler));
+    handler->thread() = std::thread([this, handler] { RunThread(handler); });
     return true;
 }
 
