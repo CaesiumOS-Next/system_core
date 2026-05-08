@@ -267,30 +267,29 @@ UeventdConfiguration ParseConfig(const std::vector<std::string>& configs) {
     parser.AddSectionParser("driver",
                             std::make_unique<SubsystemParser>(&ueventd_configuration.drivers));
 
-    using namespace std::placeholders;
     parser.AddSingleLineParser(
             "/sys/",
-            std::bind(ParsePermissionsLine, _1, &ueventd_configuration.sysfs_permissions, nullptr));
-    parser.AddSingleLineParser("/dev/", std::bind(ParsePermissionsLine, _1, nullptr,
-                                                  &ueventd_configuration.dev_permissions));
+            [&](auto&& args) { return ParsePermissionsLine(args, &ueventd_configuration.sysfs_permissions, nullptr); });
+    parser.AddSingleLineParser("/dev/", [&](auto&& args) { return ParsePermissionsLine(args, nullptr, 
+                                    &ueventd_configuration.dev_permissions); });
     parser.AddSingleLineParser("firmware_directories",
-                               std::bind(ParseFirmwareDirectoriesLine, _1,
-                                         &ueventd_configuration.firmware_directories));
+                               [&](auto&& args) { return ParseFirmwareDirectoriesLine(args, 
+                                         &ueventd_configuration.firmware_directories); });
     parser.AddSingleLineParser("external_firmware_handler",
-                               std::bind(ParseExternalFirmwareHandlerLine, _1,
-                                         &ueventd_configuration.external_firmware_handlers));
+                               [&](auto&& args) { return ParseExternalFirmwareHandlerLine(args, 
+                                         &ueventd_configuration.external_firmware_handlers); });
     parser.AddSingleLineParser("modalias_handling",
-                               std::bind(ParseEnabledDisabledLine, _1,
-                                         &ueventd_configuration.enable_modalias_handling));
+                               [&](auto&& args) { return ParseEnabledDisabledLine(args, 
+                                          &ueventd_configuration.enable_modalias_handling); });
     parser.AddSingleLineParser("uevent_socket_rcvbuf_size",
-                               std::bind(ParseUeventSocketRcvbufSizeLine, _1,
-                                         &ueventd_configuration.uevent_socket_rcvbuf_size));
+                               [&](auto&& args) { return ParseUeventSocketRcvbufSizeLine(args, 
+                                         &ueventd_configuration.uevent_socket_rcvbuf_size); });
     parser.AddSingleLineParser("parallel_restorecon_dir",
-                               std::bind(ParseParallelRestoreconDirsLine, _1,
-                                         &ueventd_configuration.parallel_restorecon_dirs));
+                               [&](auto&& args) { return ParseParallelRestoreconDirsLine(args, 
+                                         &ueventd_configuration.parallel_restorecon_dirs); });
     parser.AddSingleLineParser("parallel_restorecon",
-                               std::bind(ParseEnabledDisabledLine, _1,
-                                         &ueventd_configuration.enable_parallel_restorecon));
+                               [&](auto&& args) { return ParseEnabledDisabledLine(args, 
+                                          &ueventd_configuration.parallel_restorecon); });
 
     for (const auto& config : configs) {
         parser.ParseConfig(config);
