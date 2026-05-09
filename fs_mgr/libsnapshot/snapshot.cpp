@@ -3433,6 +3433,28 @@ Return SnapshotManager::CreateUpdateSnapshots(const DeltaArchiveManifest& manife
         return Return::Error();
     }
 
+    // Inject manifest-declared extra backing block devices (e.g. super_ext)
+    // into both builders so free space is visible to snapshot allocation.
+    // They are persisted via target_metadata's flush; source_slot on-disk
+    // metadata is never touched, preserving rollback safety.
+    for (const auto& dev : manifest.dynamic_partition_metadata().block_devices()) {
+        // NewForUpdate (VAB) doesn't touch block_devices; current and target
+        // must agree. Fail fast if the invariant ever breaks.
+        const bool has_device = current_metadata->HasBlockDevice(dev.name());
+        if (has_device != target_metadata->HasBlockDevice(dev.name())) {
+            LOG(ERROR) << dev.name() << " diverged between current/target metadata.";
+            return Return::Error();
+        }
+        if (has_device) {
+            continue;
+        }
+        if (!current_metadata->AddBlockDeviceFromManifest(opener, dev.name(), dev.size()) ||
+            !target_metadata->AddBlockDeviceFromManifest(opener, dev.name(), dev.size())) {
+            LOG(ERROR) << "Cannot inject " << dev.name() << " into snapshot metadata.";
+            return Return::Error();
+        }
+    }
+
     // Delete partitions with target suffix in |current_metadata|. Otherwise,
     // partition_cow_creator recognizes these left-over partitions as used space.
     for (const auto& group_name : current_metadata->ListGroups()) {

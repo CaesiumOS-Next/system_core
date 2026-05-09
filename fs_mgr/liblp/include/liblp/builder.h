@@ -352,6 +352,15 @@ class MetadataBuilder {
     bool GetBlockDeviceInfo(const std::string& partition_name, BlockDeviceInfo* info) const;
     bool UpdateBlockDeviceInfo(const std::string& partition_name, const BlockDeviceInfo& info);
 
+    // Appends an extra backing block device (e.g. super_ext) by querying
+    // |opener| for its on-disk size, verifying it is at least |min_size|,
+    // and inheriting alignment from the super partition. The new device
+    // has no metadata header (first_logical_sector = 0) and acts as pure
+    // free space for extent allocation. Caller must ensure the device is
+    // not already present.
+    bool AddBlockDeviceFromManifest(const IPartitionOpener& opener, const std::string& name,
+                                    uint64_t min_size);
+
     // Require the expanded metadata header. This is exposed for testing, and
     // is normally only called as needed by other methods.
     void RequireExpandedMetadataHeader();
@@ -388,6 +397,10 @@ class MetadataBuilder {
     uint64_t TotalSizeOfGroup(PartitionGroup* group) const;
     bool UpdateBlockDeviceInfo(size_t index, const BlockDeviceInfo& info);
     bool FindBlockDeviceByName(const std::string& partition_name, uint32_t* index) const;
+    // Low-level append. Fails on duplicate name, over-length name, or
+    // incompatible logical_block_size. Callers go through
+    // AddBlockDeviceFromManifest.
+    bool AddBlockDevice(const BlockDeviceInfo& device_info);
     bool ValidatePartitionSizeChange(Partition* partition, uint64_t old_size, uint64_t new_size,
                                      bool force_check);
     void ImportExtents(Partition* dest, const LpMetadata& metadata,

@@ -1066,6 +1066,60 @@ bool MetadataBuilder::UpdateBlockDeviceInfo(size_t index, const BlockDeviceInfo&
     return true;
 }
 
+bool MetadataBuilder::AddBlockDeviceFromManifest(const IPartitionOpener& opener,
+                                                 const std::string& name, uint64_t min_size) {
+    if (min_size == 0) {
+        LERROR << "Block device " << name << " has a manifest size of 0.";
+        return false;
+    }
+    BlockDeviceInfo super_info;
+    if (!GetBlockDeviceInfo(LP_METADATA_DEFAULT_PARTITION_NAME, &super_info)) {
+        LERROR << "Cannot read super block device info.";
+        return false;
+    }
+    BlockDeviceInfo phys_info;
+    if (!opener.GetInfo(name, &phys_info)) {
+        LERROR << "Cannot query block device info for " << name;
+        return false;
+    }
+    if (phys_info.size < min_size) {
+        LERROR << name << " partition size " << phys_info.size
+               << " is smaller than manifest size " << min_size;
+        return false;
+    }
+    // Use the physical size; ValidateAndSerializeMetadata enforces an exact
+    // match against ioctl(BLKGETSIZE64) on flush.
+    BlockDeviceInfo info(name, phys_info.size, super_info.alignment, super_info.alignment_offset,
+                         super_info.logical_block_size);
+    return AddBlockDevice(info);
+}
+
+bool MetadataBuilder::AddBlockDevice(const BlockDeviceInfo& info) {
+    if (HasBlockDevice(info.partition_name)) {
+        LERROR << "Block device already exists: " << info.partition_name;
+        return false;
+    }
+    if (info.partition_name.size() >= sizeof(LpMetadataBlockDevice::partition_name)) {
+        LERROR << "Block device name too long: " << info.partition_name;
+        return false;
+    }
+    if (info.logical_block_size &&
+        geometry_.logical_block_size % info.logical_block_size) {
+        LERROR << "Device logical block size is misaligned (block size="
+               << info.logical_block_size
+               << ", alignment=" << geometry_.logical_block_size << ")";
+        return false;
+    }
+    LpMetadataBlockDevice dev = {};
+    dev.size = info.size;
+    dev.alignment = info.alignment;
+    dev.alignment_offset = info.alignment_offset;
+    dev.first_logical_sector = 0;
+    memcpy(dev.partition_name, info.partition_name.c_str(), info.partition_name.size() + 1);
+    block_devices_.push_back(dev);
+    return true;
+}
+
 bool MetadataBuilder::ResizePartition(Partition* partition, uint64_t requested_size,
                                       const std::vector<Interval>& free_region_hint) {
     // Align the space needed up to the nearest sector.
