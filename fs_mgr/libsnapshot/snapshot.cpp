@@ -3433,6 +3433,55 @@ Return SnapshotManager::CreateUpdateSnapshots(const DeltaArchiveManifest& manife
         return Return::Error();
     }
 
+    // Inject manifest-declared extra backing block devices (e.g. super_ext)
+    // into both builders so free space is visible to snapshot allocation.
+    // They are persisted via target_metadata's flush; source_slot on-disk
+    // metadata is never touched, preserving rollback safety.
+    const auto& manifest_block_devices = manifest.dynamic_partition_metadata().block_devices();
+    if (!manifest_block_devices.empty()) {
+        android::fs_mgr::BlockDeviceInfo super_info;
+        if (!current_metadata->GetBlockDeviceInfo(LP_METADATA_DEFAULT_PARTITION_NAME,
+                                                  &super_info)) {
+            LOG(ERROR) << "Cannot read super block device info.";
+            return Return::Error();
+        }
+        for (const auto& dev : manifest_block_devices) {
+            // NewForUpdate (VAB) doesn't touch block_devices; current and
+            // target must agree. Fail fast if the invariant ever breaks.
+            const bool has_device = current_metadata->HasBlockDevice(dev.name());
+            if (has_device != target_metadata->HasBlockDevice(dev.name())) {
+                LOG(ERROR) << dev.name() << " diverged between current/target metadata.";
+                return Return::Error();
+            }
+            if (!has_device) {
+                android::fs_mgr::BlockDeviceInfo phys_info;
+                if (!opener.GetInfo(dev.name(), &phys_info)) {
+                    LOG(ERROR) << "Cannot query block device info for " << dev.name();
+                    return Return::Error();
+                }
+                if (phys_info.size < dev.size()) {
+                    LOG(ERROR) << dev.name() << " size " << phys_info.size
+                               << " < manifest " << dev.size();
+                    return Return::Error();
+                }
+                // Use physical size; ValidateAndSerializeMetadata enforces an
+                // exact match against ioctl(BLKGETSIZE64) on flush.
+                android::fs_mgr::BlockDeviceInfo info(dev.name(), phys_info.size,
+                                                      super_info.alignment,
+                                                      super_info.alignment_offset,
+                                                      super_info.logical_block_size);
+                if (!current_metadata->AddBlockDevice(info)) {
+                    LOG(ERROR) << "Cannot inject " << dev.name() << " into current metadata.";
+                    return Return::Error();
+                }
+                if (!target_metadata->AddBlockDevice(info)) {
+                    LOG(ERROR) << "Cannot inject " << dev.name() << " into target metadata.";
+                    return Return::Error();
+                }
+            }
+        }
+    }
+
     // Delete partitions with target suffix in |current_metadata|. Otherwise,
     // partition_cow_creator recognizes these left-over partitions as used space.
     for (const auto& group_name : current_metadata->ListGroups()) {

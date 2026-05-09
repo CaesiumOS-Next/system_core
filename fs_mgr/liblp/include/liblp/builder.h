@@ -352,6 +352,13 @@ class MetadataBuilder {
     bool GetBlockDeviceInfo(const std::string& partition_name, BlockDeviceInfo* info) const;
     bool UpdateBlockDeviceInfo(const std::string& partition_name, const BlockDeviceInfo& info);
 
+    // Append an additional backing block device (e.g. super_ext) that is not
+    // already part of the metadata. The new device will have no metadata
+    // header (first_logical_sector=0) and acts as pure free space for extent
+    // allocation. Fails if a device with the same name already exists, the
+    // name is too long, or the logical block size is incompatible.
+    bool AddBlockDevice(const BlockDeviceInfo& device_info);
+
     // Require the expanded metadata header. This is exposed for testing, and
     // is normally only called as needed by other methods.
     void RequireExpandedMetadataHeader();
