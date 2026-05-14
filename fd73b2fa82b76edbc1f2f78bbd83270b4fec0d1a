@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9493a3ab_9485d708",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 3528945
+      },
+      "writtenOn": "2026-05-14T15:07:32Z",
+      "side": 1,
+      "message": "Hi, change number 3021332 \"adb: Do not use fs_config unless we are root (try 3).\" seems closely related to this commit and you guys were the owner and reviewer. May I ask you guys to take a look?",
+      "revId": "fd73b2fa82b76edbc1f2f78bbd83270b4fec0d1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
