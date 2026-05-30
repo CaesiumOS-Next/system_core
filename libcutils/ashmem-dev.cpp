@@ -166,16 +166,15 @@ int __ashmem_open() {
 }
 
 /* Make sure file descriptor references ashmem, negative number means false */
-// TODO: return bool
-static int __ashmem_is_ashmem(int fd, bool fatal) {
+static bool __ashmem_is_ashmem(int fd, bool fatal) {
     if (__ashmem_rdev == 0 && !__init_ashmem_rdev()) {
-        return -1;
+        return false;
     }
 
     struct stat st;
-    if (fstat(fd, &st) == -1) return -1;
+    if (fstat(fd, &st) == -1) return false;
     if (S_ISCHR(st.st_mode) && st.st_rdev == __ashmem_rdev) {
-      return 0;
+      return true;
     }
 
     // TODO: move this to the single caller that actually wants it
@@ -188,7 +187,7 @@ static int __ashmem_is_ashmem(int fd, bool fatal) {
     }
 
     errno = ENOTTY;
-    return -1;
+    return false;
 }
 
 static int __ashmem_check_failure(int fd, int result) {
@@ -211,7 +210,7 @@ int ashmem_valid(int fd) {
         return 1;
     }
 
-    return __ashmem_is_ashmem(fd, false) >= 0;
+    return __ashmem_is_ashmem(fd, false) ? 1 : 0;
 }
 
 static int memfd_create_region(const char* name, size_t size) {
