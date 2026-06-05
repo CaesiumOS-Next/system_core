@@ -50,6 +50,98 @@
       "message": "Inactivity",
       "revId": "b192c1588841f9119a88153250980f813418bb8d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9df1216c_5cd66cd4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121838
+      },
+      "writtenOn": "2026-06-05T21:05:15Z",
+      "side": 1,
+      "message": "I didn\u0027t look at init/ and libmodprobe/ as I am not familiar with the code there. Otherwise looks okay.\n\n@zhangkelvin@google.com could you please cherry-pick this to the internal branch?",
+      "revId": "b192c1588841f9119a88153250980f813418bb8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "40f37534_2173d4fb",
+        "filename": "fastboot/fastboot.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1467,
+      "author": {
+        "id": 1121838
+      },
+      "writtenOn": "2026-06-05T21:05:15Z",
+      "side": 1,
+      "message": "nit: I would personally create a borrowed_fd outside the lambda and pass the borrowed_fd by value. But it shouldn\u0027t matter here -- do_for_partitions should be synchronous.",
+      "fixSuggestions": [
+        {
+          "fixId": "4f7beeb4_a17f3472",
+          "description": "prompt_to_edit API",
+          "replacements": [
+            {
+              "path": "fastboot/fastboot.cpp",
+              "range": {
+                "startLine": 1468,
+                "startChar": 0,
+                "endLine": 1469,
+                "endChar": 0
+              },
+              "replacement": "    borrowed_fd borrowed_out_fd(fd);\n    auto fetch \u003d [borrowed_out_fd, fb](const std::string\u0026 partition) {\n        return fetch_partition(partition, borrowed_out_fd, fb);\n    };\n"
+            }
+          ]
+        }
+      ],
+      "revId": "b192c1588841f9119a88153250980f813418bb8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1a90d28b_876a8c2d",
+        "filename": "init/firmware_handler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1121838
+      },
+      "writtenOn": "2026-06-05T21:05:15Z",
+      "side": 1,
+      "message": "I believe there is a slight change of behavior here. Previously `devpath` is captured; now, `this` is captured. But I think that\u0027s fine.",
+      "revId": "b192c1588841f9119a88153250980f813418bb8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3f226bbf_9f66bdfe",
+        "filename": "init/ueventd_parser.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1121838
+      },
+      "writtenOn": "2026-06-05T21:05:15Z",
+      "side": 1,
+      "message": "Please fix this WARNING reported by Check Contents: Lines longer than 100 characters should be wrapped to improve readability; see h...\n\nLines longer than 100 characters should be wrapped to improve readability; see https://source.android.com/setup/contribute/code-style#limit-line-length for more details. See go/ayeaye-long-lines for ayeaye-specific info.",
+      "range": {
+        "startLine": 272,
+        "startChar": 0,
+        "endLine": 272,
+        "endChar": 141
+      },
+      "revId": "b192c1588841f9119a88153250980f813418bb8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
