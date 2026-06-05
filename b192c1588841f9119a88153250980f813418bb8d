@@ -33,6 +33,23 @@
       "message": "Hello! How\u0027s the code review going?",
       "revId": "b192c1588841f9119a88153250980f813418bb8d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1ea374f2_446794f0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 4790607
+      },
+      "writtenOn": "2026-06-05T18:10:54Z",
+      "side": 1,
+      "message": "Inactivity",
+      "revId": "b192c1588841f9119a88153250980f813418bb8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
