@@ -104,6 +104,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e6f1c072_1cf5b404",
+        "filename": "fastboot/fastboot.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1467,
+      "author": {
+        "id": 4790607
+      },
+      "writtenOn": "2026-06-06T10:25:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "40f37534_2173d4fb",
+      "revId": "b192c1588841f9119a88153250980f813418bb8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1a90d28b_876a8c2d",
@@ -121,6 +139,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "13c57264_da440308",
+        "filename": "init/firmware_handler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 4790607
+      },
+      "writtenOn": "2026-06-06T10:25:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a90d28b_876a8c2d",
+      "revId": "b192c1588841f9119a88153250980f813418bb8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3f226bbf_9f66bdfe",
@@ -134,6 +170,30 @@
       "writtenOn": "2026-06-05T21:05:15Z",
       "side": 1,
       "message": "Please fix this WARNING reported by Check Contents: Lines longer than 100 characters should be wrapped to improve readability; see h...\n\nLines longer than 100 characters should be wrapped to improve readability; see https://source.android.com/setup/contribute/code-style#limit-line-length for more details. See go/ayeaye-long-lines for ayeaye-specific info.",
+      "range": {
+        "startLine": 272,
+        "startChar": 0,
+        "endLine": 272,
+        "endChar": 141
+      },
+      "revId": "b192c1588841f9119a88153250980f813418bb8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bdcadfdc_6faa51f2",
+        "filename": "init/ueventd_parser.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 4790607
+      },
+      "writtenOn": "2026-06-06T10:25:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3f226bbf_9f66bdfe",
       "range": {
         "startLine": 272,
         "startChar": 0,
