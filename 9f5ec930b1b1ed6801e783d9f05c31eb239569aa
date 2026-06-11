@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b8556e07_95941895",
+        "filename": "fastboot/fastboot.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1469,
+      "author": {
+        "id": 4790607
+      },
+      "writtenOn": "2026-06-11T18:58:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57c1a07e_f521df25",
+      "range": {
+        "startLine": 1469,
+        "startChar": 0,
+        "endLine": 1469,
+        "endChar": 0
+      },
+      "revId": "9f5ec930b1b1ed6801e783d9f05c31eb239569aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a422ed3d_7867f29b",
@@ -37,6 +61,30 @@
       "writtenOn": "2026-06-11T18:03:52Z",
       "side": 1,
       "message": "Please fix this WARNING reported by Trailing Whitespace: Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 1470,
+        "startChar": 63,
+        "endLine": 1470,
+        "endChar": 64
+      },
+      "revId": "9f5ec930b1b1ed6801e783d9f05c31eb239569aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "58160a28_609b7784",
+        "filename": "fastboot/fastboot.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1470,
+      "author": {
+        "id": 4790607
+      },
+      "writtenOn": "2026-06-11T18:58:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a422ed3d_7867f29b",
       "range": {
         "startLine": 1470,
         "startChar": 63,
@@ -70,6 +118,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "76a9d772_1219cd35",
+        "filename": "init/ueventd_parser.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 4790607
+      },
+      "writtenOn": "2026-06-11T18:58:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f81e956d_e38a13b4",
+      "range": {
+        "startLine": 273,
+        "startChar": 0,
+        "endLine": 273,
+        "endChar": 0
+      },
+      "revId": "9f5ec930b1b1ed6801e783d9f05c31eb239569aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e6facff3_9c85169c",
@@ -93,6 +165,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "755d48a0_065f4a8c",
+        "filename": "init/ueventd_parser.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 4790607
+      },
+      "writtenOn": "2026-06-11T18:58:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e6facff3_9c85169c",
+      "range": {
+        "startLine": 275,
+        "startChar": 122,
+        "endLine": 275,
+        "endChar": 123
+      },
+      "revId": "9f5ec930b1b1ed6801e783d9f05c31eb239569aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "df858346_34fa0a4b",
@@ -106,6 +202,30 @@
       "writtenOn": "2026-06-11T18:03:52Z",
       "side": 1,
       "message": "Please fix this WARNING reported by Trailing Whitespace: Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 281,
+        "startChar": 116,
+        "endLine": 281,
+        "endChar": 117
+      },
+      "revId": "9f5ec930b1b1ed6801e783d9f05c31eb239569aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f7da987b_7343a183",
+        "filename": "init/ueventd_parser.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 4790607
+      },
+      "writtenOn": "2026-06-11T18:58:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df858346_34fa0a4b",
       "range": {
         "startLine": 281,
         "startChar": 116,
