@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "57c1a07e_f521df25",
+        "filename": "fastboot/fastboot.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1469,
+      "author": {
+        "id": 1083168
+      },
+      "writtenOn": "2026-06-11T18:03:52Z",
+      "side": 1,
+      "message": "Trailing whitespace.",
+      "range": {
+        "startLine": 1469,
+        "startChar": 0,
+        "endLine": 1469,
+        "endChar": 0
+      },
+      "revId": "9f5ec930b1b1ed6801e783d9f05c31eb239569aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a422ed3d_7867f29b",
+        "filename": "fastboot/fastboot.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1470,
+      "author": {
+        "id": 1083168
+      },
+      "writtenOn": "2026-06-11T18:03:52Z",
+      "side": 1,
+      "message": "Please fix this WARNING reported by Trailing Whitespace: Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 1470,
+        "startChar": 63,
+        "endLine": 1470,
+        "endChar": 64
+      },
+      "revId": "9f5ec930b1b1ed6801e783d9f05c31eb239569aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f81e956d_e38a13b4",
+        "filename": "init/ueventd_parser.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1083168
+      },
+      "writtenOn": "2026-06-11T18:03:52Z",
+      "side": 1,
+      "message": "`ParsePermissionsLine` takes `std::vector\u003cstd::string\u003e\u0026\u0026`. Since `args` is a named variable in the lambda, you must use `std::move(args)` to forward it as an rvalue, otherwise this will fail to compile.\n\n```cpp\nreturn ParsePermissionsLine(std::move(args), \u0026ueventd_configuration.sysfs_permissions, nullptr);\n```",
+      "range": {
+        "startLine": 273,
+        "startChar": 0,
+        "endLine": 273,
+        "endChar": 0
+      },
+      "revId": "9f5ec930b1b1ed6801e783d9f05c31eb239569aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e6facff3_9c85169c",
+        "filename": "init/ueventd_parser.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1083168
+      },
+      "writtenOn": "2026-06-11T18:03:52Z",
+      "side": 1,
+      "message": "Please fix this WARNING reported by Trailing Whitespace: Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 275,
+        "startChar": 122,
+        "endLine": 275,
+        "endChar": 123
+      },
+      "revId": "9f5ec930b1b1ed6801e783d9f05c31eb239569aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "df858346_34fa0a4b",
+        "filename": "init/ueventd_parser.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1083168
+      },
+      "writtenOn": "2026-06-11T18:03:52Z",
+      "side": 1,
+      "message": "Please fix this WARNING reported by Trailing Whitespace: Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 281,
+        "startChar": 116,
+        "endLine": 281,
+        "endChar": 117
+      },
+      "revId": "9f5ec930b1b1ed6801e783d9f05c31eb239569aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
