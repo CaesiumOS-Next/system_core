@@ -20,7 +20,9 @@
 #include <private/fs_config.h>
 
 #include <android-base/file.h>
+#include <algorithm>
 #include <string>
+#include <vector>
 
 /* NOTES
 **
@@ -142,69 +144,44 @@ static void _eject_trailer()
 
 static void _archive(char *in, char *out, int ilen, int olen);
 
-static int compare(const void* a, const void* b) {
-  return strcmp(*(const char**)a, *(const char**)b);
-}
-
 static void _archive_dir(char *in, char *out, int ilen, int olen)
 {
-    int i, t;
     struct dirent *de;
 
     DIR* d = opendir(in);
     if (d == NULL) err(1, "cannot open directory '%s'", in);
 
-    // TODO: switch to std::vector
-    int size = 32;
-    int entries = 0;
-    char** names = (char**) malloc(size * sizeof(char*));
-    if (names == NULL) {
-      errx(1, "failed to allocate dir names array (size %d)", size);
-    }
+    std::vector<std::string> names;
 
-    while((de = readdir(d)) != 0){
-            /* xxx: feature? maybe some dotfiles are okay */
+    while((de = readdir(d)) != nullptr) {
+        /* xxx: feature? maybe some dotfiles are okay */
         if(de->d_name[0] == '.') continue;
 
-            /* xxx: hack. use a real exclude list */
+        /* xxx: hack. use a real exclude list */
         if(!strcmp(de->d_name, "root")) continue;
 
-        if (entries >= size) {
-          size *= 2;
-          names = (char**) realloc(names, size * sizeof(char*));
-          if (names == NULL) {
-            errx(1, "failed to reallocate dir names array (size %d)", size);
-          }
-        }
-        names[entries] = strdup(de->d_name);
-        if (names[entries] == NULL) {
-          errx(1, "failed to strdup name \"%s\"", de->d_name);
-        }
-        ++entries;
+        names.emplace_back(de->d_name);
     }
 
-    qsort(names, entries, sizeof(char*), compare);
+    std::sort(names.begin(), names.end());
 
-    for (i = 0; i < entries; ++i) {
-        t = strlen(names[i]);
+    for (const auto& name : names) {
+        int t = static_cast<int>(name.size());
         in[ilen] = '/';
-        memcpy(in + ilen + 1, names[i], t + 1);
+        memcpy(in + ilen + 1, name.c_str(), t + 1);
 
         if(olen > 0) {
             out[olen] = '/';
-            memcpy(out + olen + 1, names[i], t + 1);
+            memcpy(out + olen + 1, name.c_str(), t + 1);
             _archive(in, out, ilen + t + 1, olen + t + 1);
         } else {
-            memcpy(out, names[i], t + 1);
+            memcpy(out, name.c_str(), t + 1);
             _archive(in, out, ilen + t + 1, t);
         }
 
         in[ilen] = 0;
         out[olen] = 0;
-
-        free(names[i]);
     }
-    free(names);
 
     closedir(d);
 }
