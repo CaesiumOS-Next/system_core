@@ -44,8 +44,11 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include <algorithm>
+#include <cctype>
 #include <map>
 #include <memory>
+#include <unordered_map>
 
 #include <android-base/chrono_utils.h>
 #include <android-base/file.h>
@@ -1048,23 +1051,28 @@ static Result<void> do_restorecon_recursive(const BuiltinArguments& args) {
 }
 
 static Result<void> do_loglevel(const BuiltinArguments& args) {
-    // TODO: support names instead/as well?
-    int log_level = -1;
-    android::base::ParseInt(args[1], &log_level);
-    android::base::LogSeverity severity;
-    switch (log_level) {
-        case 7: severity = android::base::DEBUG; break;
-        case 6: severity = android::base::INFO; break;
-        case 5:
-        case 4: severity = android::base::WARNING; break;
-        case 3: severity = android::base::ERROR; break;
-        case 2:
-        case 1:
-        case 0: severity = android::base::FATAL; break;
-        default:
-            return Error() << "invalid log level " << log_level;
+    std::string s = args[1];
+    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
+        return static_cast<char>(std::tolower(c));
+    });
+
+    static const std::unordered_map<std::string,
+        android::base::LogSeverity> log_levels = {
+            {"7", android::base::DEBUG},   {"debug",   android::base::DEBUG},
+            {"6", android::base::INFO},    {"info",    android::base::INFO},
+            {"5", android::base::WARNING}, {"warning", android::base::WARNING},
+            {"4", android::base::WARNING}, {"warn",    android::base::WARNING},
+            {"3", android::base::ERROR},   {"error",   android::base::ERROR},
+            {"2", android::base::FATAL},   {"fatal",   android::base::FATAL},
+            {"1", android::base::FATAL},
+            {"0", android::base::FATAL}
+        };
+
+    const auto it = log_levels.find(s);
+    if (it == log_levels.end()) {
+        return Error() << "invalid log level " << args[1];
     }
-    android::base::SetMinimumLogSeverity(severity);
+    android::base::SetMinimumLogSeverity(it->second);
     return {};
 }
 

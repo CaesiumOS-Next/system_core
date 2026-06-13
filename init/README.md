@@ -670,11 +670,13 @@ provides the `aidl_lazy_test_1` interface.
   This is included in the default init.rc.
 
 `loglevel <level>`
-> Sets init's log level to the integer level, from 7 (all logging) to 0
-  (fatal logging only). The numeric values correspond to the kernel log
-  levels, but this command does not affect the kernel log level. Use the
-  `write` command to write to `/proc/sys/kernel/printk` to change that.
-  Properties are expanded within _level_.
+> Sets init's log level to the specified value. _level_ accepts
+  case-insensitive strings or integers: `debug` (7), `info` (6),
+  `warning`/`warn` (5, 4), `error` (3), or `fatal` (2, 1, 0). The numeric values
+  correspond to the kernel log levels, but this command does not affect the
+  kernel log level. Use the `write` command to write to
+  `/proc/sys/kernel/printk` to change that. Properties are expanded within
+  _level_.
 
 `mark_post_data`
 > (This action is deprecated and no-op.)
