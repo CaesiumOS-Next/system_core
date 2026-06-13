@@ -337,10 +337,8 @@ int recognized_device(usb_handle* handle, ifc_match_func callback) {
 static std::unique_ptr<usb_handle> find_usb_device(ifc_match_func callback) {
     std::unique_ptr<usb_handle> handle;
     char entry_buffer[2048];
-    char interf_name[2048];
     AdbInterfaceInfo* next_interface = (AdbInterfaceInfo*)(&entry_buffer[0]);
     unsigned long entry_buffer_size = sizeof(entry_buffer);
-    char* copy_name;
 
     // Enumerate all present and active interfaces.
     ADBAPIHANDLE enum_handle =
@@ -350,17 +348,6 @@ static std::unique_ptr<usb_handle> find_usb_device(ifc_match_func callback) {
         return NULL;
 
     while (AdbNextInterface(enum_handle, next_interface, &entry_buffer_size)) {
-        // TODO(vchtchetkine): FIXME - temp hack converting wchar_t into char.
-        // It would be better to change AdbNextInterface so it will return
-        // interface name as single char string.
-        const wchar_t* wchar_name = next_interface->device_name;
-        for(copy_name = interf_name;
-                L'\0' != *wchar_name;
-                wchar_name++, copy_name++) {
-            *copy_name = (char)(*wchar_name);
-        }
-        *copy_name = '\0';
-
         DBG("attempting to open interface %S\n", next_interface->device_name);
         handle = do_usb_open(next_interface->device_name);
         if (NULL != handle) {
