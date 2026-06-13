@@ -418,7 +418,7 @@ void String8::toLower()
 
     char* buf = lockBuffer(length);
     for (size_t i = length; i > 0; --i) {
-        *buf = static_cast<char>(tolower(*buf));
+        *buf = static_cast<char>(tolower(static_cast<unsigned char>(*buf)));
         buf++;
     }
     unlockBuffer(length);
