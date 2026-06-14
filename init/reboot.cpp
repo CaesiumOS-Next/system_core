@@ -658,9 +658,18 @@ static void DoReboot(unsigned int cmd, const std::string& reason, const std::str
 
     bool is_thermal_shutdown = cmd == ANDROID_RB_THERMOFF;
 
+    // True only on factory-reset path; set by RecoverySystemService before pm.reboot(recovery).
+    // Used to scope all factory-reset optimisations without affecting any other reboot/shutdown.
+    const bool is_factory_reset =
+            android::base::GetProperty("sys.factoryreset.pending", "0") == "1";
+
     auto shutdown_timeout = 0ms;
     if (!SHUTDOWN_ZERO_TIMEOUT) {
-        constexpr unsigned int shutdown_timeout_default = 6;
+        // factory-reset: 2s — ShutdownThread fast path already drained most services,
+        //                     so a short window is sufficient.
+        // all other paths: 6s — restore proper SIGTERM window (shutdown_timeout/2 = 3s)
+        //                       before SIGKILL, so services have a chance to exit cleanly.
+        const unsigned int shutdown_timeout_default = is_factory_reset ? 2U : 6U;
         constexpr unsigned int max_thermal_shutdown_timeout = 3;
         auto shutdown_timeout_final = android::base::GetUintProperty("ro.build.shutdown_timeout",
                                                                      shutdown_timeout_default);
@@ -787,7 +796,13 @@ static void DoReboot(unsigned int cmd, const std::string& reason, const std::str
         // Manually abort FUSE connections, since the FUSE daemon is already dead
         // at this point, and unmounting it might hang.
         CallVdc("volume", "abort_fuse");
-        CallVdc("volume", "shutdown");
+        // Skip vold volume shutdown only on factory-reset path: /data will be wiped,
+        // so a clean vold shutdown is unnecessary and wastes hundreds of ms.
+        // All other paths (normal shutdown, OTA, manual recovery, bootloader) need
+        // proper vold shutdown to avoid filesystem inconsistency.
+        if (!is_factory_reset) {
+            CallVdc("volume", "shutdown");
+        }
         vold_service->Stop();
     } else {
         LOG(INFO) << "vold not running, skipping vold shutdown";
@@ -804,10 +819,18 @@ static void DoReboot(unsigned int cmd, const std::string& reason, const std::str
     // 5. drop caches and disable zram backing device, if exist
     KillZramBackingDevice();
 
-    LOG(INFO) << "Ready to unmount apexes. So far shutdown sequence took " << t;
     // 6. unmount active apexes, otherwise they might prevent clean unmount of /data.
-    if (auto ret = UnmountAllApexes(); !ret.ok()) {
-        LOG(ERROR) << ret.error();
+    // Skip only on factory-reset path: /data will be wiped, clean unmount not needed.
+    // All other paths (normal shutdown, OTA, manual recovery, bootloader) must unmount
+    // apexes to avoid leaving /data in an inconsistent state.
+    if (!is_factory_reset) {
+        LOG(INFO) << "Ready to unmount apexes. So far shutdown sequence took " << t;
+        if (auto ret = UnmountAllApexes(); !ret.ok()) {
+            LOG(ERROR) << ret.error();
+        }
+    } else {
+        LOG(INFO) << "Skipping apex unmount for factory-reset path. "
+                  << "So far shutdown sequence took " << t;
     }
     UmountStat stat =
             TryUmountAndFsck(cmd, run_fsck, shutdown_timeout - t.duration(), &reboot_semaphore);
@@ -818,7 +841,10 @@ static void DoReboot(unsigned int cmd, const std::string& reason, const std::str
         sync();
         LOG(INFO) << "sync() after umount took" << sync_timer;
     }
-    if (!is_thermal_shutdown) std::this_thread::sleep_for(100ms);
+    // Skip post-sync sleep only on factory-reset path: no UI to settle, saves 100ms.
+    // All other paths (including manual recovery, bootloader) restore the sleep so the
+    // UI has time to settle before hardware reset.
+    if (!is_thermal_shutdown && !is_factory_reset) std::this_thread::sleep_for(100ms);
     LogShutdownTime(stat, &t);
 
     // Send signal to terminate reboot monitor thread.
