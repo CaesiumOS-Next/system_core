@@ -658,9 +658,18 @@ static void DoReboot(unsigned int cmd, const std::string& reason, const std::str
 
     bool is_thermal_shutdown = cmd == ANDROID_RB_THERMOFF;
 
+    // True only on factory-reset path; set by RecoverySystemService before pm.reboot(recovery).
+    // Used to scope all factory-reset optimisations without affecting any other reboot/shutdown.
+    const bool is_factory_reset =
+            android::base::GetProperty("sys.factoryreset.pending", "0") == "1";
+
     auto shutdown_timeout = 0ms;
     if (!SHUTDOWN_ZERO_TIMEOUT) {
-        constexpr unsigned int shutdown_timeout_default = 6;
+        // factory-reset: 2s — ShutdownThread fast path already drained most services,
+        //                     so a short window is sufficient.
+        // all other paths: 6s — restore proper SIGTERM window (shutdown_timeout/2 = 3s)
+        //                       before SIGKILL, so services have a chance to exit cleanly.
+        const unsigned int shutdown_timeout_default = is_factory_reset ? 2U : 6U;
         constexpr unsigned int max_thermal_shutdown_timeout = 3;
         auto shutdown_timeout_final = android::base::GetUintProperty("ro.build.shutdown_timeout",
                                                                      shutdown_timeout_default);
@@ -771,9 +780,18 @@ static void DoReboot(unsigned int cmd, const std::string& reason, const std::str
     }
 
     // optional shutdown step
-    // 1. terminate all services except shutdown critical ones. wait for delay to finish
+    // 1. terminate all services except shutdown critical ones. wait for delay to finish.
+    // Factory-reset: use a short 300 ms SIGTERM window instead of the full window.
+    // RC shutdown triggers normally kill the critical vendor services (rtkd, tvservice,
+    // vendor.rtk.media) before DoReboot runs, but we cannot rely on that: init's
+    // ClearQueue() call in HandlePowerctlMessage can race with the RC property-trigger
+    // and wipe it before it fires.  A short SIGTERM + immediate SIGKILL ensures every
+    // service holding /data is dead before the early RebootSystem below, without the
+    // full shutdown_timeout/2 wait that normal paths need.
     if (shutdown_timeout > 0ms) {
-        StopServicesAndLogViolations(stop_first, shutdown_timeout / 2, true /* SIGTERM */);
+        const auto sigterm_window =
+                is_factory_reset ? std::chrono::milliseconds(300) : shutdown_timeout / 2;
+        StopServicesAndLogViolations(stop_first, sigterm_window, true /* SIGTERM */);
     }
     // Send SIGKILL to ones that didn't terminate cleanly.
     StopServicesAndLogViolations(stop_first, 0ms, false /* SIGKILL */);
@@ -787,27 +805,55 @@ static void DoReboot(unsigned int cmd, const std::string& reason, const std::str
         // Manually abort FUSE connections, since the FUSE daemon is already dead
         // at this point, and unmounting it might hang.
         CallVdc("volume", "abort_fuse");
-        CallVdc("volume", "shutdown");
+        // Skip vold volume shutdown only on factory-reset path: /data will be wiped,
+        // so a clean vold shutdown is unnecessary and wastes hundreds of ms.
+        // All other paths (normal shutdown, OTA, manual recovery, bootloader) need
+        // proper vold shutdown to avoid filesystem inconsistency.
+        if (!is_factory_reset) {
+            CallVdc("volume", "shutdown");
+        }
         vold_service->Stop();
     } else {
         LOG(INFO) << "vold not running, skipping vold shutdown";
     }
     // logcat stopped here
     StopServices(kDebuggingServices, 0ms, false /* SIGKILL */);
-    // 4. sync, try umount, and optionally run fsck for user shutdown
+    // 4. sync — flush any pending journal/metadata writes before handoff to recovery.
     {
         Timer sync_timer;
         LOG(INFO) << "sync() before umount...";
         sync();
         LOG(INFO) << "sync() before umount took" << sync_timer;
     }
+
+    // Factory-reset fast path: /data will be wiped by recovery; a clean unmount,
+    // zram teardown, and fsck are all unnecessary and together cost 1–2 s.
+    // All services were killed by SIGTERM+SIGKILL above, so /data is no longer held.
+    // One sync() above is sufficient to flush pending writes before handing off.
+    if (is_factory_reset) {
+        LOG(INFO) << "Factory-reset: skipping zram teardown, umount and fsck — "
+                  << "reboot directly. Shutdown sequence took " << t;
+        reboot_monitor_run = false;
+        sem_post(&reboot_semaphore);
+        RebootSystem(cmd, reboot_target, reason);
+        abort();
+    }
+
     // 5. drop caches and disable zram backing device, if exist
     KillZramBackingDevice();
 
-    LOG(INFO) << "Ready to unmount apexes. So far shutdown sequence took " << t;
     // 6. unmount active apexes, otherwise they might prevent clean unmount of /data.
-    if (auto ret = UnmountAllApexes(); !ret.ok()) {
-        LOG(ERROR) << ret.error();
+    // Skip only on factory-reset path: /data will be wiped, clean unmount not needed.
+    // All other paths (normal shutdown, OTA, manual recovery, bootloader) must unmount
+    // apexes to avoid leaving /data in an inconsistent state.
+    if (!is_factory_reset) {
+        LOG(INFO) << "Ready to unmount apexes. So far shutdown sequence took " << t;
+        if (auto ret = UnmountAllApexes(); !ret.ok()) {
+            LOG(ERROR) << ret.error();
+        }
+    } else {
+        LOG(INFO) << "Skipping apex unmount for factory-reset path. "
+                  << "So far shutdown sequence took " << t;
     }
     UmountStat stat =
             TryUmountAndFsck(cmd, run_fsck, shutdown_timeout - t.duration(), &reboot_semaphore);
@@ -818,7 +864,10 @@ static void DoReboot(unsigned int cmd, const std::string& reason, const std::str
         sync();
         LOG(INFO) << "sync() after umount took" << sync_timer;
     }
-    if (!is_thermal_shutdown) std::this_thread::sleep_for(100ms);
+    // Skip post-sync sleep only on factory-reset path: no UI to settle, saves 100ms.
+    // All other paths (including manual recovery, bootloader) restore the sleep so the
+    // UI has time to settle before hardware reset.
+    if (!is_thermal_shutdown && !is_factory_reset) std::this_thread::sleep_for(100ms);
     LogShutdownTime(stat, &t);
 
     // Send signal to terminate reboot monitor thread.
