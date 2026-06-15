@@ -202,6 +202,30 @@
       },
       "revId": "b192c1588841f9119a88153250980f813418bb8d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a904ec55_853244d6",
+        "filename": "init/ueventd_parser.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1121838
+      },
+      "writtenOn": "2026-06-15T22:52:29Z",
+      "side": 1,
+      "message": "I am afraid you still have a lot of lines longer than 100 cols.\n\nThe person cherry-picking your change should be able to format this automatically for you though...",
+      "parentUuid": "bdcadfdc_6faa51f2",
+      "range": {
+        "startLine": 272,
+        "startChar": 0,
+        "endLine": 272,
+        "endChar": 141
+      },
+      "revId": "b192c1588841f9119a88153250980f813418bb8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
