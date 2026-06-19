@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "06156627_7f20e06c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1132673
+      },
+      "writtenOn": "2026-06-19T04:19:18Z",
+      "side": 1,
+      "message": "I like this. Thanks!\n\nBy the way, would you be able to update system/core/init/README.md as well?",
+      "revId": "6690316ec476b8cb606b2cd420c6d3ab9385278f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
