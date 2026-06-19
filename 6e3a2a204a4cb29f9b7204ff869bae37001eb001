@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b4d728f9_b976cea6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1132673
+      },
+      "writtenOn": "2026-06-19T07:32:13Z",
+      "side": 1,
+      "message": "Thanks. I\u0027ve cherry-picked this into the internal git_main branch. You may abandon this change here.",
+      "revId": "6e3a2a204a4cb29f9b7204ff869bae37001eb001",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
