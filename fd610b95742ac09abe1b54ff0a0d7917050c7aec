@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "182f113d_e9581957",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1059977
+      },
+      "writtenOn": "2026-06-21T14:57:18Z",
+      "side": 1,
+      "message": "```suggestion\nThis explicitly casts to unsigned char as per the function\nrequired.\n```",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 9
+      },
+      "revId": "fd610b95742ac09abe1b54ff0a0d7917050c7aec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4b7e8612_52b9668c",
+        "filename": "libutils/binder/String8.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1059977
+      },
+      "writtenOn": "2026-06-21T14:57:18Z",
+      "side": 1,
+      "message": "Please fix this WARNING reported by autoreview issue finding: Pre-existing bug: `lockBuffer` can return `nullptr` if memory allocation fails. It should be checked here to avoid a null pointer dereference, similar to how it is handled in `removeAll` or `appendFormatV`.",
+      "range": {
+        "startLine": 419,
+        "startChar": 0,
+        "endLine": 419,
+        "endChar": 0
+      },
+      "revId": "fd610b95742ac09abe1b54ff0a0d7917050c7aec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
