@@ -16,6 +16,24 @@
       "message": "this conflicts with android-17 internally, so probably best to wait until that hits aosp and try again...",
       "revId": "2d4b01bf5a77b91bb27b5ca9710359edc6609328",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "245870a6_ce2d69b3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1934715
+      },
+      "writtenOn": "2026-06-22T22:02:57Z",
+      "side": 1,
+      "message": "@chakrabortyshubham66@gmail.com, looks like `android17-release` is ready if you\u0027d like to try this again: https://android.googlesource.com/platform/system/core/+/refs/heads/android17-release",
+      "parentUuid": "cf99bf29_e37895b0",
+      "revId": "2d4b01bf5a77b91bb27b5ca9710359edc6609328",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
