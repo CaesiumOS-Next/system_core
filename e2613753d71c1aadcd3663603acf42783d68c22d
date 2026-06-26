@@ -16,6 +16,46 @@
       "message": "01-01 00:00:05.636     1     1 I init    : Command \u0027start zygote_secondary\u0027 action\u003dzygote-start (/system/etc/init/hw/init.rc:1088) took 0ms and failed: service zygote_secondary not found",
       "revId": "e2613753d71c1aadcd3663603acf42783d68c22d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "89f85111_775af40a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1132673
+      },
+      "writtenOn": "2026-06-26T08:34:07Z",
+      "side": 1,
+      "message": "Please add the motivation of this change to the commit message. Is it to silence the warning about non-existing zygote_secondary on 64bit-only devices?\n\nAlso, given that you have made a mistake by not dropping `on`, I am a bit worried that this might not have been tested. Please add a test for this.",
+      "revId": "e2613753d71c1aadcd3663603acf42783d68c22d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "83080f29_83503e8a",
+        "filename": "rootdir/init.rc",
+        "patchSetId": 3
+      },
+      "lineNbr": 1096,
+      "author": {
+        "id": 1132673
+      },
+      "writtenOn": "2026-06-26T08:34:07Z",
+      "side": 1,
+      "message": "this should be dropped.",
+      "range": {
+        "startLine": 1096,
+        "startChar": 19,
+        "endLine": 1096,
+        "endChar": 22
+      },
+      "revId": "e2613753d71c1aadcd3663603acf42783d68c22d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
