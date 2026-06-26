@@ -35,6 +35,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b6aaa067_b94c21ce",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1400304
+      },
+      "writtenOn": "2026-06-26T11:19:13Z",
+      "side": 1,
+      "message": "Commit message updated properly\nmy bad, mistakenly add Unable to add a test since its rc file change and didnt see any tests relate to rc files https://cs.android.com/android/platform/superproject/+/android-latest-release:system/core/rootdir/tests/",
+      "parentUuid": "89f85111_775af40a",
+      "revId": "e2613753d71c1aadcd3663603acf42783d68c22d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "83080f29_83503e8a",
@@ -48,6 +66,30 @@
       "writtenOn": "2026-06-26T08:34:07Z",
       "side": 1,
       "message": "this should be dropped.",
+      "range": {
+        "startLine": 1096,
+        "startChar": 19,
+        "endLine": 1096,
+        "endChar": 22
+      },
+      "revId": "e2613753d71c1aadcd3663603acf42783d68c22d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "25b28c91_ec6a4c36",
+        "filename": "rootdir/init.rc",
+        "patchSetId": 3
+      },
+      "lineNbr": 1096,
+      "author": {
+        "id": 1400304
+      },
+      "writtenOn": "2026-06-26T11:19:13Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "83080f29_83503e8a",
       "range": {
         "startLine": 1096,
         "startChar": 19,
