@@ -1092,6 +1092,8 @@ on zygote-start
     wait_for_prop odsign.verification.done 1
     start statsd
     start zygote
+
+on zygote-start && property:ro.zygote=zygote64_32
     start zygote_secondary
 
 on boot && property:ro.config.low_ram=true
