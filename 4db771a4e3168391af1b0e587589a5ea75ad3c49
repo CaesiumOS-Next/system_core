@@ -16,6 +16,24 @@
       "message": "@jiyong@google.com Gentle ping",
       "revId": "4db771a4e3168391af1b0e587589a5ea75ad3c49",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "442776f1_784cae2e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1132673
+      },
+      "writtenOn": "2026-06-30T09:09:50Z",
+      "side": 1,
+      "message": "This is cherry-picked to our internal git_main. You may abandon this here.",
+      "parentUuid": "b9110e2e_1faea376",
+      "revId": "4db771a4e3168391af1b0e587589a5ea75ad3c49",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
