@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "beececbb_97f13f44",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 4963380
+      },
+      "writtenOn": "2026-07-02T06:42:44Z",
+      "side": 1,
+      "message": "Hello,\n\nWe encountered a Windows host-side fastboot crash while formatting a partition:\n\n\"fastboot format data\nmke2fs 1.46.6 (1-Feb-2023)\nCreating filesystem with 2693632 4k blocks and 674624 inodes\nFilesystem UUID: be4bf24c-75df-11f1-bf1b-194a51f4d094\nSuperblock backups stored on blocks:\n32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208\n\nAllocating group tables: done\nWriting inode tables: done\nCreating journal (16384 blocks): done\nWriting superblocks and filesystem accounting information: done\n\nlibc++abi: terminating due to uncaught exception of type std::out_of_range: basic_string\"\n\nThe issue appears to be caused by reopening the generated image without O_BINARY on Windows. Other fastboot image loading paths already use O_BINARY, but fb_perform_format() reopened the temporary formatted image with O_RDONLY only.\n\nThis change reopens the generated image with O_BINARY to keep sparse image handling binary-safe on Windows.\n\nWe verified this solution in our environment, and it resolves the issue described above.\n\nPlease review.",
+      "revId": "74dfb5aeeff560d50455acc0bd4389abab2c2fe0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
