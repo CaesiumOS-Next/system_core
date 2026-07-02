@@ -2097,7 +2097,7 @@ void fb_perform_format(const std::string& partition, int skip_if_not_supported,
         die("Cannot generate image for %s", partition.c_str());
     }
 
-    fd.reset(open(output.path, O_RDONLY));
+    fd.reset(open(output.path, O_RDONLY | O_BINARY));
     if (fd == -1) {
         die("Cannot open generated image: %s", strerror(errno));
     }
