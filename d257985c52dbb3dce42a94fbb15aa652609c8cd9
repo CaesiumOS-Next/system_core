@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "1f0aad82_de4e2f36",
         "filename": "OWNERS",
@@ -14,10 +15,28 @@
       "side": 1,
       "message": "I suspect I might have to make global changes here when kernel headers change, any chance I could get in as an owner?",
       "revId": "d257985c52dbb3dce42a94fbb15aa652609c8cd9",
-      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
-      "unresolved": true
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "963c3775_46c5f8cf",
+        "filename": "OWNERS",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 4973331
+      },
+      "writtenOn": "2026-07-27T01:47:30Z",
+      "side": 1,
+      "message": "\u003e I suspect I might have to make global changes here when kernel headers change, any chance I could get in as an owner?\ntobe.bellman@gmail.com",
+      "parentUuid": "1f0aad82_de4e2f36",
+      "revId": "d257985c52dbb3dce42a94fbb15aa652609c8cd9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "a0241fd2_f3366379",
         "filename": "healthd/OWNERS",
@@ -37,10 +56,10 @@
         "endChar": 10
       },
       "revId": "d257985c52dbb3dce42a94fbb15aa652609c8cd9",
-      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
-      "unresolved": true
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "ce86b256_19db0a55",
         "filename": "libmemunreachable/OWNERS",
@@ -60,10 +79,10 @@
         "endChar": 17
       },
       "revId": "d257985c52dbb3dce42a94fbb15aa652609c8cd9",
-      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
-      "unresolved": true
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "062dcae6_c1181df6",
         "filename": "logd/OWNERS",
@@ -83,10 +102,10 @@
         "endChar": 20
       },
       "revId": "d257985c52dbb3dce42a94fbb15aa652609c8cd9",
-      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
-      "unresolved": true
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "4aaa896a_f2a0e158",
         "filename": "trusty/OWNERS",
@@ -100,10 +119,10 @@
       "side": 1,
       "message": "I think swillden/jdanis are doing a lot in trusty these days too. gatekeeper/keymaster/libtrusty are all under here",
       "revId": "d257985c52dbb3dce42a94fbb15aa652609c8cd9",
-      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
-      "unresolved": true
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "14668d07_cc393830",
         "filename": "trusty/OWNERS",
@@ -118,8 +137,7 @@
       "message": "git says no. (these were all based on git shortlog.) and these aren\u0027t final anyway. just meant to be a starting point of actual current maintainers.",
       "parentUuid": "4aaa896a_f2a0e158",
       "revId": "d257985c52dbb3dce42a94fbb15aa652609c8cd9",
-      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
-      "unresolved": true
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
