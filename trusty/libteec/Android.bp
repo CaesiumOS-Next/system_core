@@ -30,3 +30,31 @@ cc_library {
         "-Werror",
     ],
 }
+
+cc_test {
+    name: "gptee_libteec_negative_test",
+    srcs: ["tests/libteec_negative_test.c"],
+    shared_libs: ["libteec"],
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+    ],
+    test_suites: ["device-tests"],
+}
+
+cc_test {
+    name: "gptee_current_client_test",
+    srcs: ["tests/current_client_test.c"],
+    header_libs: ["gptee_ipc_headers"],
+    shared_libs: [
+        "libteec",
+        "libtrusty",
+    ],
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+    ],
+    test_suites: ["device-tests"],
+}
