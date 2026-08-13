@@ -51,6 +51,7 @@ class Modprobe {
     bool Rmmod(const std::string& module_name);
     std::vector<std::string> GetDependencies(const std::string& module);
     bool ModuleExists(const std::string& module_name);
+<<<<<<< HEAD
     void AddOption(const std::string& module_name, const std::string& option_name,
                    const std::string& value);
     std::string GetKernelCmdline();
@@ -58,12 +59,40 @@ class Modprobe {
     bool ParseDepCallback(const std::string& base_path, const std::vector<std::string>& args);
     bool ParseAliasCallback(const std::vector<std::string>& args);
     bool ParseSoftdepCallback(const std::vector<std::string>& args);
+=======
+<<<<<<< HEAD
+    bool IsBlocklisted(const std::string& module_name);
+
+  private:
+    bool IsLoadSequential(const std::string& module) const;
+    std::string MakeCanonical(const std::string& module_path);
+    bool InsmodWithDeps(const std::string& module_name, const std::string& parameters);
+    bool Insmod(const std::string& path_name, const std::string& parameters)
+>>>>>>> PATCH
     bool ParseLoadCallback(const std::vector<std::string>& args);
     bool ParseOptionsCallback(const std::vector<std::string>& args);
     bool ParseDynOptionsCallback(const std::vector<std::string>& args);
     bool ParseBlocklistCallback(const std::vector<std::string>& args);
     void ParseKernelCmdlineOptions();
     void ParseCfg(const std::string& cfg, std::function<bool(const std::vector<std::string>&)> f);
+=======
+    std::vector<std::string> GetDependencies(const std::string& module);
+    bool ModuleExists(const std::string& module_name);
+
+    // These fields are initialized by the constructor and never modified. They are
+    // read without locking by the worker threads in LoadModulesParallel(), so const
+    // is what makes that safe.
+    const std::vector<std::pair<std::string, std::string>> module_aliases_;
+    const std::unordered_map<std::string, std::vector<std::string>> module_deps_;
+    const std::vector<std::pair<std::string, std::string>> module_pre_softdep_;
+    const std::vector<std::pair<std::string, std::string>> module_post_softdep_;
+    const std::vector<std::string> module_load_;
+    const std::unordered_map<std::string, std::string> module_options_;
+    const std::set<std::string> module_blocklist_;
+
+    std::mutex module_loaded_lock_;
+    std::unordered_set<std::string> module_loaded_ GUARDED_BY(module_loaded_lock_);
+>>>>>>> PATCH
 
     std::vector<std::pair<std::string, std::string>> module_aliases_;
     std::unordered_map<std::string, std::vector<std::string>> module_deps_;
