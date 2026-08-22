@@ -57,6 +57,8 @@ static constexpr const char* TEMPLATE_TASK_PROFILE_API_FILE =
         "/etc/task_profiles/task_profiles_%u.json";
 namespace {
 
+static std::atomic<bool> g_disable_fd_cache{false};
+
 class FdCacheHelper {
   public:
     enum FdState {
@@ -345,6 +347,10 @@ bool SetCgroupAction::AddTidToCgroup(pid_t tid, int fd, ResourceCacheType cache_
 
 ProfileAction::CacheUseResult SetCgroupAction::UseCachedFd(ResourceCacheType cache_type,
                                                            int id) const {
+    if (g_disable_fd_cache) {
+        return ProfileAction::UNUSED;
+    }
+
     std::lock_guard<std::mutex> lock(fd_mutex_);
     if (FdCacheHelper::IsCached(fd_[cache_type])) {
         // fd is cached, reuse it
@@ -439,6 +445,11 @@ void SetCgroupAction::DropResourceCaching(ResourceCacheType cache_type) {
 }
 
 bool SetCgroupAction::IsValidForProcess(uid_t uid, pid_t pid) const {
+    if (g_disable_fd_cache) {
+        std::string procs_path = controller()->GetProcsFilePath(path_, uid, pid);
+        return access(procs_path.c_str(), W_OK) == 0;
+    }
+
     std::lock_guard<std::mutex> lock(fd_mutex_);
     if (FdCacheHelper::IsCached(fd_[ProfileAction::RCT_PROCESS])) {
         return true;
@@ -453,6 +464,11 @@ bool SetCgroupAction::IsValidForProcess(uid_t uid, pid_t pid) const {
 }
 
 bool SetCgroupAction::IsValidForTask(int) const {
+    if (g_disable_fd_cache) {
+        std::string tasks_path = controller()->GetTasksFilePath(path_);
+        return access(tasks_path.c_str(), W_OK) == 0;
+    }
+
     std::lock_guard<std::mutex> lock(fd_mutex_);
     if (FdCacheHelper::IsCached(fd_[ProfileAction::RCT_TASK])) {
         return true;
@@ -517,6 +533,10 @@ bool WriteFileAction::WriteValueToFile(const std::string& value_, ResourceCacheT
 
 ProfileAction::CacheUseResult WriteFileAction::UseCachedFd(ResourceCacheType cache_type,
                                                            const std::string& value) const {
+    if (g_disable_fd_cache) {
+        return ProfileAction::UNUSED;
+    }
+
     std::lock_guard<std::mutex> lock(fd_mutex_);
     if (FdCacheHelper::IsCached(fd_[cache_type])) {
         // fd is cached, reuse it
@@ -608,6 +628,10 @@ void WriteFileAction::DropResourceCaching(ResourceCacheType cache_type) {
 }
 
 bool WriteFileAction::IsValidForProcess(uid_t, pid_t) const {
+    if (g_disable_fd_cache) {
+        return access(proc_path_.empty() ? task_path_.c_str() : proc_path_.c_str(), W_OK) == 0;
+    }
+
     std::lock_guard<std::mutex> lock(fd_mutex_);
     if (FdCacheHelper::IsCached(fd_[ProfileAction::RCT_PROCESS])) {
         return true;
@@ -621,6 +645,10 @@ bool WriteFileAction::IsValidForProcess(uid_t, pid_t) const {
 }
 
 bool WriteFileAction::IsValidForTask(int) const {
+    if (g_disable_fd_cache) {
+        return access(task_path_.c_str(), W_OK) == 0;
+    }
+
     std::lock_guard<std::mutex> lock(fd_mutex_);
     if (FdCacheHelper::IsCached(fd_[ProfileAction::RCT_TASK])) {
         return true;
@@ -772,7 +800,7 @@ bool TaskProfile::ExecuteForUID(uid_t uid) const {
 }
 
 void TaskProfile::EnableResourceCaching(ProfileAction::ResourceCacheType cache_type) {
-    if (res_cached_) {
+    if (res_cached_ || g_disable_fd_cache) {
         return;
     }
 
@@ -784,7 +812,7 @@ void TaskProfile::EnableResourceCaching(ProfileAction::ResourceCacheType cache_t
 }
 
 void TaskProfile::DropResourceCaching(ProfileAction::ResourceCacheType cache_type) {
-    if (!res_cached_) {
+    if (!res_cached_ || g_disable_fd_cache) {
         return;
     }
 
@@ -810,9 +838,16 @@ bool TaskProfile::IsValidForTask(pid_t tid) const {
 }
 
 void TaskProfiles::DropResourceCaching(ProfileAction::ResourceCacheType cache_type) const {
+    if (g_disable_fd_cache) {
+        return;
+    }
     for (auto& iter : profiles_) {
         iter.second->DropResourceCaching(cache_type);
     }
+}
+
+void TaskProfiles::DisableResourceCaching() {
+    g_disable_fd_cache = true;
 }
 
 TaskProfiles& TaskProfiles::GetInstance() {

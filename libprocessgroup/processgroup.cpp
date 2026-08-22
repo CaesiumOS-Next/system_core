@@ -188,6 +188,10 @@ void DropTaskProfilesResourceCaching() {
     TaskProfiles::GetInstance().DropResourceCaching(ProfileAction::RCT_PROCESS);
 }
 
+void DisableTaskProfilesResourceCaching() {
+    TaskProfiles::GetInstance().DisableResourceCaching();
+}
+
 bool SetProcessProfiles(uid_t uid, pid_t pid, const std::vector<std::string>& profiles) {
     return TaskProfiles::GetInstance().SetProcessProfiles(
             uid, pid, std::span<const std::string>(profiles), false);

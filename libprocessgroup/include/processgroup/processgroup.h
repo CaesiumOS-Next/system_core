@@ -61,6 +61,10 @@ bool UsePerAppMemcg();
 // should be active again. E.g. Zygote specialization for child process.
 void DropTaskProfilesResourceCaching();
 
+// Disable resource caching completely for a process. Used during Zygote app specialization to
+// prevent dirtying shared TaskProfiles heap pages via fd_ caching and mutex locks.
+void DisableTaskProfilesResourceCaching();
+
 // Return 0 if all processes were killed and the cgroup was successfully removed.
 // Returns -1 in the case of an error occurring or if there are processes still running.
 int killProcessGroup(uid_t uid, pid_t initialPid, int signal);
