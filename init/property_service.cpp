@@ -1114,7 +1114,8 @@ static void property_initialize_ro_vendor_api_level() {
 
     // In Android U and earlier, ro.board.api_level may not be defined, so use the first api level
     // instead.
-    const auto board_api_level = GetIntProperty("ro.board.api_level", board_first_api_level);
+    auto board_api_level = GetIntProperty("ro.board.api_level", board_first_api_level);
+    board_api_level = std::min(board_first_api_level, board_api_level);
 
     // If the chipset is frozen, ro.vendor.api_level may be lowered to the board API level, since
     // the vendor image is frozen and not expected to change anymore.
