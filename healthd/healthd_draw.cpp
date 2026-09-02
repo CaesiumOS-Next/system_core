@@ -99,11 +99,20 @@ void HealthdDraw::blank_screen(bool blank, int drm) {
     gr_fb_blank(blank, drm);
 }
 
+static GRRotation get_rotation_from_property() {
+    std::string rotation = android::base::GetProperty("ro.minui.default_rotation", "");
+    if (rotation == "ROTATION_LEFT") {
+        return GRRotation::LEFT;
+    }
+
+    return GRRotation::RIGHT;
+}
+
 // support screen rotation for foldable phone
 void HealthdDraw::rotate_screen(int drm) {
     if (!graphics_available) return;
     if (drm == 0)
-        gr_rotate(GRRotation::RIGHT /* landscape mode */);
+        gr_rotate(get_rotation_from_property() /* landscape mode */);
     else
         gr_rotate(GRRotation::NONE /* Portrait mode */);
 }
