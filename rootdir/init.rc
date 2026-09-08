@@ -1236,7 +1236,10 @@ on charger
 
 on property:sys.boot_completed=1
     bootchart stop
-    # Setup per_boot directory so other .rc could start to use it on boot_completed
+
+on early-boot
+    # Setup per_boot directory as soon as /data and the per-boot key are
+    # available, so that swapon_all and other .rc files can use it during boot
     exec - system system -- /bin/rm -rf /data/per_boot
     mkdir /data/per_boot 0710 system system encryption=Require key=per_boot_ref
 
