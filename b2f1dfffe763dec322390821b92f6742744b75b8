@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "108710f5_a00caf94",
+        "filename": "rootdir/init.rc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1240,
+      "author": {
+        "id": 1290458
+      },
+      "writtenOn": "2026-09-08T20:35:12Z",
+      "side": 1,
+      "message": "is there a reason you went with early-boot vs post-fs-data (which is immediately after /data mounts)?",
+      "revId": "b2f1dfffe763dec322390821b92f6742744b75b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
