@@ -271,6 +271,10 @@ static int filter_usb_device(char* sysfs_name,
     while (len > 0) {
         struct usb_descriptor_header *hdr = (struct usb_descriptor_header *)ptr;
         if (check(hdr, len, USB_DT_INTERFACE, USB_DT_INTERFACE_SIZE)) {
+            // A zero-length descriptor would leave len and ptr unchanged and
+            // spin this loop forever. Some devices report one in the wild
+            // (see b/302212871 for adb), so reject the device instead.
+            if (hdr->bLength == 0) return -1;
             // This code parses only standard interfaces, skip everything else
             // (e.g interface association descriptor).
             len -= hdr->bLength;
@@ -294,6 +298,9 @@ static int filter_usb_device(char* sysfs_name,
 	            struct usb_descriptor_header *hdr = (struct usb_descriptor_header *)ptr;
                 if (check(hdr, len, USB_DT_ENDPOINT, USB_DT_ENDPOINT_SIZE) == 0)
                     break;
+                // Same guard as above: never let a malformed descriptor stall
+                // the walk.
+                if (hdr->bLength == 0) return -1;
                 len -= hdr->bLength;
                 ptr += hdr->bLength;
             }
