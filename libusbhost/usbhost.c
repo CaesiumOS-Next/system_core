@@ -588,7 +588,12 @@ void usb_descriptor_iter_init(struct usb_device *device, struct usb_descriptor_i
 struct usb_descriptor_header *usb_descriptor_iter_next(struct usb_descriptor_iter *iter)
 {
     struct usb_descriptor_header* next;
-    if (iter->curr_desc >= iter->config_end)
+    // A descriptor header is two bytes, and callers read both. Checking
+    // only that curr_desc is below config_end lets the last byte of the
+    // buffer be returned as a header, so bDescriptorType is read at
+    // config_end -- one past the descriptor data. Require room for the
+    // whole header.
+    if (iter->curr_desc + sizeof(struct usb_descriptor_header) > iter->config_end)
         return NULL;
     next = (struct usb_descriptor_header*)iter->curr_desc;
     // Corrupt descriptor with zero length, cannot continue iterating
