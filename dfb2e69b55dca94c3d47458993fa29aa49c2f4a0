@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "91f80fb2_fd51dcd5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1003224
+      },
+      "writtenOn": "2026-09-21T13:46:00Z",
+      "side": 1,
+      "message": "what fuzzer, what corpus?",
+      "revId": "dfb2e69b55dca94c3d47458993fa29aa49c2f4a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
