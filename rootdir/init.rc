@@ -1325,6 +1325,16 @@ on property:persist.device_config.mglru_native.lru_gen_config=core_and_nonleaf_y
   write /sys/kernel/mm/lru_gen/enabled 5
 on property:persist.device_config.mglru_native.lru_gen_config=all
   write /sys/kernel/mm/lru_gen/enabled 7
+on property:persist.device_config.mglru_native.lru_gen_importance_mode=0
+  write /sys/kernel/mm/lru_gen/importance_mode 0
+on property:persist.device_config.mglru_native.lru_gen_importance_mode=1
+  write /sys/kernel/mm/lru_gen/importance_mode 1
+on property:persist.device_config.mglru_native.lru_gen_importance_mode=2
+  write /sys/kernel/mm/lru_gen/importance_mode 2
+on property:persist.device_config.mglru_native.lru_gen_importance_mode=3
+  write /sys/kernel/mm/lru_gen/importance_mode 3
+on property:persist.device_config.mglru_native.lru_gen_importance_mode=4
+  write /sys/kernel/mm/lru_gen/importance_mode 4
 
 # Allow other processes to run `snapshotctl` through `init`. This requires
 # `set_prop` permission on `snapshotctl_prop`.
