@@ -23,6 +23,7 @@
 #include <condition_variable>
 #include <memory>
 #include <mutex>
+#include <thread>
 #include <vector>
 
 #include <android-base/unique_fd.h>
@@ -54,6 +55,9 @@ struct usb_handle {
     android::base::unique_fd control;
     android::base::unique_fd bulk_out;  // "out" from the host's perspective => source for adbd
     android::base::unique_fd bulk_in;   // "in" from the host's perspective => sink for adbd
+
+    std::thread event_thread;
+    android::base::unique_fd event_thread_stop;
 
     // Access to these blocks is very not thread safe. Have one block for each of the
     // read and write threads.

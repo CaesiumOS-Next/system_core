@@ -20,10 +20,13 @@
 #include <fcntl.h>
 #include <linux/usb/ch9.h>
 #include <linux/usb/functionfs.h>
+#include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/eventfd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include <android-base/logging.h>
 #include <android-base/properties.h>
@@ -185,8 +188,66 @@ static struct DescV2 v2_descriptor = {
         .ss_descs = ss_descriptors,
 };
 
+static void EventThread(usb_handle* h) {
+    while (true) {
+        struct pollfd pfds[2] = {
+                {.fd = h->control.get(), .events = POLLIN, .revents = 0},
+                {.fd = h->event_thread_stop.get(), .events = POLLIN, .revents = 0},
+        };
+        if (TEMP_FAILURE_RETRY(poll(pfds, 2, -1)) < 0) {
+            PLOG(ERROR) << "cannot poll for functionfs events";
+            return;
+        }
+
+        if (pfds[1].revents & POLLIN) {
+            // handle request to shutdown the thread
+            return;
+        }
+        if (!(pfds[0].revents & POLLIN)) {
+            continue;
+        }
+
+        struct usb_functionfs_event event;
+        ssize_t rc = TEMP_FAILURE_RETRY(read(h->control.get(), &event, sizeof(event)));
+        if (rc < 0) {
+            PLOG(ERROR) << "cannot read event from control endpoint " << kUsbFfsFastbootEp0;
+            return;
+        }
+        if (rc != static_cast<ssize_t>(sizeof(event))) {
+            LOG(ERROR) << "short read on control endpoint: " << rc;
+            return;
+        }
+
+        if (event.type == FUNCTIONFS_DISABLE) {
+            LOG(ERROR) << "received FUNCTIONFS_DISABLE, exiting to force gadget unbind and rebind";
+            _exit(0);
+        }
+    }
+}
+
+static bool StartEventThread(usb_handle* h) {
+    h->event_thread_stop.reset(eventfd(0, EFD_CLOEXEC));
+    if (h->event_thread_stop < 0) {
+        PLOG(ERROR) << "cannot create eventfd to stop event thread";
+        return false;
+    }
+    h->event_thread = std::thread(EventThread, h);
+    return true;
+}
+
+static void StopEventThread(usb_handle* h) {
+    if (h == nullptr || !h->event_thread.joinable()) {
+        return;
+    }
+    uint64_t v = 1;
+    TEMP_FAILURE_RETRY(write(h->event_thread_stop.get(), &v, sizeof(v)));
+    h->event_thread.join();
+    h->event_thread_stop.reset();
+}
+
 // Reimplementing since usb_ffs_close() does not close the control FD.
 static void CloseFunctionFs(usb_handle* h) {
+    StopEventThread(h);
     h->bulk_in.reset();
     h->bulk_out.reset();
     h->control.reset();
@@ -232,6 +293,10 @@ static bool InitFunctionFs(usb_handle* h) {
 
     h->read_aiob.fd = h->bulk_out.get();
     h->write_aiob.fd = h->bulk_in.get();
+
+    if (!StartEventThread(h)) {
+        goto err;
+    }
     return true;
 
 err:
@@ -244,6 +309,10 @@ ClientUsbTransport::ClientUsbTransport()
     if (!InitFunctionFs(handle_.get())) {
         handle_.reset(nullptr);
     }
+}
+
+ClientUsbTransport::~ClientUsbTransport() {
+    StopEventThread(handle_.get());
 }
 
 ssize_t ClientUsbTransport::Read(void* data, size_t len) {

@@ -24,7 +24,7 @@
 class ClientUsbTransport : public Transport {
   public:
     ClientUsbTransport();
-    ~ClientUsbTransport() override = default;
+    ~ClientUsbTransport() override;
 
     ssize_t Read(void* data, size_t len) override;
     ssize_t Write(const void* data, size_t len) override;
