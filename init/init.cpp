@@ -707,7 +707,14 @@ static BootMode GetBootMode() {
 // In case of multiple UDC controllers select the first one.
 static void SetUsbController(bool run_loop) {
     if (udc_controller_set) return;
-
+    // If the bootloader or device init already specified a controller via
+    // androidboot.usbcontroller, don't override it with the first entry
+    // from /sys/class/udc/ (which is alphabetical and may be wrong on
+    // devices with multiple UDC controllers).
+    if (!GetProperty("sys.usb.controller", "").empty()) {
+        udc_controller_set = true;
+        return;
+    }
     do {
         std::unique_ptr<DIR, decltype(&closedir)> dir(opendir("/sys/class/udc"), closedir);
         if (!dir) return;
